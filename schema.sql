@@ -6,7 +6,7 @@
 -- ==========================================
 
 -- Profiles Table (linked to Supabase Auth Users)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   email TEXT NOT NULL,
   full_name TEXT,
@@ -16,7 +16,7 @@ CREATE TABLE profiles (
 );
 
 -- Workspaces Table
-CREATE TABLE workspaces (
+CREATE TABLE IF NOT EXISTS workspaces (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
@@ -26,7 +26,7 @@ CREATE TABLE workspaces (
 );
 
 -- Workspace Members Table (Roles: 'owner', 'manager', 'member')
-CREATE TABLE workspace_members (
+CREATE TABLE IF NOT EXISTS workspace_members (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE workspace_members (
 );
 
 -- Projects Table
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
@@ -50,7 +50,7 @@ CREATE TABLE projects (
 );
 
 -- Project Members Table
-CREATE TABLE project_members (
+CREATE TABLE IF NOT EXISTS project_members (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   project_id UUID REFERENCES projects(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE project_members (
 );
 
 -- Tasks Table
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   project_id UUID REFERENCES projects(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE tasks (
 );
 
 -- Checklists Table
-CREATE TABLE checklists (
+CREATE TABLE IF NOT EXISTS checklists (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   task_id UUID REFERENCES tasks(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE checklists (
 );
 
 -- Comments Table
-CREATE TABLE comments (
+CREATE TABLE IF NOT EXISTS comments (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   task_id UUID REFERENCES tasks(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
@@ -91,7 +91,7 @@ CREATE TABLE comments (
 );
 
 -- Attachments Table
-CREATE TABLE attachments (
+CREATE TABLE IF NOT EXISTS attachments (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   task_id UUID REFERENCES tasks(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE attachments (
 );
 
 -- Notifications Table
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
   title TEXT NOT NULL,
@@ -112,7 +112,7 @@ CREATE TABLE notifications (
 );
 
 -- Activity Logs Table
-CREATE TABLE activity_logs (
+CREATE TABLE IF NOT EXISTS activity_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
