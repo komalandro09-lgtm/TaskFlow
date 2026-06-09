@@ -16,7 +16,12 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   const { workspaces, activeWorkspace, switchWorkspace, createWorkspace, projects } = useWorkspace();
@@ -52,17 +57,37 @@ const Sidebar: React.FC = () => {
   }
 
   return (
-    <aside className="relative flex h-full w-64 flex-col border-r border-slate-800/80 bg-slate-950 p-4">
-      {/* Brand Logo */}
-      <div className="mb-6 flex items-center gap-2 px-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-brand-600 to-violet-500 text-white shadow-lg shadow-brand-500/20">
-          <Briefcase size={20} className="stroke-[2.5]" />
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isOpen && (
+        <div 
+          onClick={onClose} 
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-all duration-300 md:hidden"
+        />
+      )}
+
+      <aside className={`fixed inset-y-0 left-0 z-50 flex h-full w-64 flex-col border-r border-slate-800/80 bg-slate-950 p-4 transition-transform duration-300 md:relative md:translate-x-0 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        {/* Brand Logo */}
+        <div className="mb-6 flex items-center justify-between px-2">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-brand-600 to-violet-500 text-white shadow-lg shadow-brand-500/20">
+              <Briefcase size={20} className="stroke-[2.5]" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-white bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+              TaskFlow
+            </span>
+            <span className="rounded bg-brand-500/10 px-1.5 py-0.5 text-[10px] font-medium text-brand-400">SaaS</span>
+          </div>
+          {/* Close button for mobile */}
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-900 hover:text-slate-200 md:hidden transition-colors"
+          >
+            <X size={16} />
+          </button>
         </div>
-        <span className="text-xl font-bold tracking-tight text-white bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-          TaskFlow
-        </span>
-        <span className="rounded bg-brand-500/10 px-1.5 py-0.5 text-[10px] font-medium text-brand-400">SaaS</span>
-      </div>
 
       {/* Workspace Selector */}
       <div className="relative mb-6">
@@ -254,6 +279,7 @@ const Sidebar: React.FC = () => {
         </div>
       )}
     </aside>
+    </>
   );
 };
 

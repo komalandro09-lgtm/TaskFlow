@@ -60,11 +60,13 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // Main Dashboard Shell
 const DashboardLayout: React.FC = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar />
+        <Topbar onMenuClick={() => setIsSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto bg-slate-900/50 p-6 md:p-8">
           <Routes>
             <Route path="/" element={<Dashboard />} />

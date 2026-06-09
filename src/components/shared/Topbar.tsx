@@ -1,9 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { Bell, Search, CheckCheck, Inbox, ShieldAlert } from 'lucide-react';
+import { Bell, Search, CheckCheck, Inbox, ShieldAlert, Menu } from 'lucide-react';
 
-const Topbar: React.FC = () => {
+interface TopbarProps {
+  onMenuClick?: () => void;
+}
+
+const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const location = useLocation();
   const { notifications, markNotificationRead, markAllNotificationsRead } = useWorkspace();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -48,9 +52,15 @@ const Topbar: React.FC = () => {
 
   return (
     <header className="flex h-16 w-full items-center justify-between border-b border-slate-800/80 bg-slate-950/40 px-6 backdrop-blur-md">
-      {/* Page Title */}
-      <div>
-        <h1 className="text-lg font-bold tracking-tight text-white md:text-xl">
+      {/* Menu Hamburger Trigger & Page Title */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onMenuClick}
+          className="rounded-xl border border-slate-800 bg-slate-900/40 p-2 text-slate-400 hover:bg-slate-900 hover:text-slate-200 md:hidden transition-colors"
+        >
+          <Menu size={18} />
+        </button>
+        <h1 className="text-base font-bold tracking-tight text-white md:text-xl truncate max-w-[180px] sm:max-w-xs md:max-w-none">
           {getHeaderTitle()}
         </h1>
       </div>
