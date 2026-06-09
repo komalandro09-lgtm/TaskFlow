@@ -1390,6 +1390,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       markNotificationRead,
       markAllNotificationsRead,
       logActivity,
+      getProjectMessages,
+      sendProjectMessage,
       triggerNotification,
       refreshWorkspaceData,
       seedDatabase
