@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../supabaseClient';
@@ -29,6 +29,8 @@ import {
 const ProjectDetail: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const taskIdParam = searchParams.get('task');
   const { user: currentUser } = useAuth();
   const { theme } = useTheme();
   const { 
@@ -113,6 +115,15 @@ const ProjectDetail: React.FC = () => {
     }
   }, [projectId, projects]);
 
+  useEffect(() => {
+    if (taskIdParam && tasks.length > 0 && (!selectedTask || selectedTask.id !== taskIdParam)) {
+      const task = tasks.find(t => t.id === taskIdParam);
+      if (task) {
+        handleOpenTaskDetails(task);
+      }
+    }
+  }, [taskIdParam, tasks]);
+
   const loadTasks = async () => {
     if (!projectId) return;
     setLoading(true);
@@ -196,10 +207,19 @@ const ProjectDetail: React.FC = () => {
     }
   };
 
+  const handleCloseTaskDetails = () => {
+    setSelectedTask(null);
+    if (searchParams.has('task')) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('task');
+      navigate(`/project/${projectId}?${newParams.toString()}`, { replace: true });
+    }
+  };
+
   const handleDeleteTask = async (taskId: string) => {
     if (confirm('Are you sure you want to delete this task? This action is permanent.')) {
       await deleteTask(taskId);
-      setSelectedTask(null);
+      handleCloseTaskDetails();
       loadTasks();
       loadChatMessages();
       refreshWorkspaceData();
@@ -1038,7 +1058,7 @@ const ProjectDetail: React.FC = () => {
                   <Trash2 size={16} />
                 </button>
                 <button
-                  onClick={() => setSelectedTask(null)}
+                  onClick={handleCloseTaskDetails}
                   className="rounded-lg p-1.5 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-800 dark:hover:text-slate-100"
                 >
                   <X size={18} />

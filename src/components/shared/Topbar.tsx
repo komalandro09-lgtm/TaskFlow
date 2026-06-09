@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { useTheme } from '../../context/ThemeContext';
-import { Bell, Search, CheckCheck, Inbox, Menu, Sun, Moon } from 'lucide-react';
+import { Bell, Search, CheckCheck, Inbox, Menu, Sun, Moon, KanbanSquare, CheckSquare, User, Loader2 } from 'lucide-react';
+import { supabase } from '../../supabaseClient';
 
 interface TopbarProps {
   onMenuClick?: () => void;
@@ -10,21 +11,109 @@ interface TopbarProps {
 
 const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const { notifications, markNotificationRead, markAllNotificationsRead } = useWorkspace();
+  const { 
+    notifications, 
+    markNotificationRead, 
+    markAllNotificationsRead,
+    activeWorkspace,
+    projects,
+    members
+  } = useWorkspace();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close notifications list when clicking outside
+  // Search workspace states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{
+    projects: any[];
+    tasks: any[];
+    members: any[];
+  } | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close search results or notifications when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsNotifOpen(false);
       }
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Debounced search query logic
+  useEffect(() => {
+    if (!searchQuery.trim() || !activeWorkspace) {
+      setSearchResults(null);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearching(true);
+      setShowSearchResults(true);
+      try {
+        const query = searchQuery.toLowerCase();
+
+        // 1. Search projects locally in context
+        const matchedProjects = (projects || []).filter(p => 
+          p.name.toLowerCase().includes(query) || 
+          (p.description || '').toLowerCase().includes(query)
+        );
+
+        // 2. Search members locally in context
+        const matchedMembers = (members || []).filter(m => 
+          (m.profile?.full_name || '').toLowerCase().includes(query) || 
+          (m.profile?.email || '').toLowerCase().includes(query)
+        );
+
+        // 3. Search tasks in active workspace projects
+        let matchedTasks: any[] = [];
+        const projectIds = (projects || []).map(p => p.id);
+        if (projectIds.length > 0) {
+          const { data: dbTasks } = await supabase
+            .from('tasks')
+            .select('*')
+            .in('project_id', projectIds);
+
+          if (dbTasks) {
+            matchedTasks = dbTasks.filter((t: any) => 
+              t.title.toLowerCase().includes(query) || 
+              (t.description || '').toLowerCase().includes(query)
+            );
+          } else {
+            // Mock DB fallback
+            const dbState = JSON.parse(localStorage.getItem('taskflow_mock_db') || '{}');
+            const localTasks = (dbState.tasks || []).filter((t: any) => projectIds.includes(t.project_id));
+            matchedTasks = localTasks.filter((t: any) => 
+              t.title.toLowerCase().includes(query) || 
+              (t.description || '').toLowerCase().includes(query)
+            );
+          }
+        }
+
+        setSearchResults({
+          projects: matchedProjects,
+          tasks: matchedTasks,
+          members: matchedMembers
+        });
+      } catch (err) {
+        console.error('Search query failed:', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, projects, members, activeWorkspace]);
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
@@ -53,8 +142,7 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/40 px-6 backdrop-blur-md transition-colors duration-200 text-slate-850 dark:text-white">
-      {/* Menu Hamburger Trigger & Page Title */}
+    <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/85 dark:bg-slate-950/85 px-4 backdrop-blur-md transition-colors duration-200 md:px-6">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
@@ -70,13 +158,107 @@ const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
       {/* Global Actions Bar */}
       <div className="flex items-center gap-3">
         {/* Search Input */}
-        <div className="relative hidden max-w-xs md:block">
+        <div className="relative hidden max-w-xs md:block" ref={searchContainerRef}>
           <Search size={16} className="absolute left-3.5 top-2.5 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             placeholder="Search workspace..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
             className="w-56 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/40 py-2 pl-10 pr-4 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:border-brand-500/80 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition-all duration-200"
           />
+
+          {/* Search Results Dropdown */}
+          {showSearchResults && (
+            <div className="absolute left-0 mt-2 w-80 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2 shadow-2xl shadow-slate-200 dark:shadow-black/60 animate-in fade-in slide-in-from-top-2 duration-150 max-h-96 overflow-y-auto z-50">
+              <div className="border-b border-slate-100 dark:border-slate-800 px-3 py-2 flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Search Results</span>
+                {isSearching && <Loader2 className="animate-spin text-brand-500" size={14} />}
+              </div>
+
+              <div className="py-1">
+                {isSearching && !searchResults && (
+                  <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">Searching workspace...</div>
+                )}
+
+                {!isSearching && (!searchResults || (searchResults.projects.length === 0 && searchResults.tasks.length === 0 && searchResults.members.length === 0)) ? (
+                  <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
+                    No results found for "{searchQuery}"
+                  </div>
+                ) : (
+                  searchResults && (
+                    <div className="flex flex-col gap-3">
+                      {/* Projects Group */}
+                      {searchResults.projects.length > 0 && (
+                        <div>
+                          <div className="px-3 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Projects</div>
+                          {searchResults.projects.map(p => (
+                            <button
+                              key={p.id}
+                              onClick={() => {
+                                navigate(`/project/${p.id}`);
+                                setShowSearchResults(false);
+                                setSearchQuery('');
+                              }}
+                              className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors"
+                            >
+                              <KanbanSquare size={14} className="text-brand-500" />
+                              <span className="truncate font-medium">{p.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Tasks Group */}
+                      {searchResults.tasks.length > 0 && (
+                        <div>
+                          <div className="px-3 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Tasks</div>
+                          {searchResults.tasks.map(t => (
+                            <button
+                              key={t.id}
+                              onClick={() => {
+                                navigate(`/project/${t.project_id}?task=${t.id}`);
+                                setShowSearchResults(false);
+                                setSearchQuery('');
+                              }}
+                              className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors"
+                            >
+                              <CheckSquare size={14} className="text-emerald-500" />
+                              <span className="truncate font-medium">{t.title}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Members Group */}
+                      {searchResults.members.length > 0 && (
+                        <div>
+                          <div className="px-3 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Teammates</div>
+                          {searchResults.members.map(m => (
+                            <button
+                              key={m.id}
+                              onClick={() => {
+                                navigate('/members');
+                                setShowSearchResults(false);
+                                setSearchQuery('');
+                              }}
+                              className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors"
+                            >
+                              <User size={14} className="text-blue-500" />
+                              <span className="truncate font-medium">
+                                {m.profile?.full_name || 'Pending User'}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Theme Toggle Button */}
