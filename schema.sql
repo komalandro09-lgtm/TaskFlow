@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 );
 
 -- Firewall Blocked IPs Table
-CREATE TABLE firewall_blocked_ips (
+CREATE TABLE IF NOT EXISTS firewall_blocked_ips (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   ip_address TEXT UNIQUE NOT NULL,
   reason TEXT,
@@ -142,7 +142,7 @@ CREATE TABLE firewall_blocked_ips (
 );
 
 -- Firewall Rate Limits Table
-CREATE TABLE firewall_rate_limits (
+CREATE TABLE IF NOT EXISTS firewall_rate_limits (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   ip_address TEXT NOT NULL,
   action TEXT NOT NULL,
@@ -152,7 +152,7 @@ CREATE TABLE firewall_rate_limits (
 );
 
 -- Audit Logs Table
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
   email TEXT,
@@ -404,3 +404,9 @@ CREATE POLICY "Enable update for all on firewall_rate_limits" ON firewall_rate_l
 
 CREATE POLICY "Enable insert for all on audit_logs" ON audit_logs
   FOR INSERT WITH CHECK (true);
+
+-- ==========================================
+-- 5. REALTIME SUBSCRIPTIONS
+-- ==========================================
+-- Enable real-time for the notifications table so users receive pop-ups instantly
+ALTER PUBLICATION supabase_realtime ADD TABLE notifications;

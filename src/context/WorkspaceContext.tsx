@@ -174,6 +174,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeToast, setActiveToast] = useState<{id: string, title: string, desc: string} | null>(null);
 
   // 1. Initial Load of Workspaces
   useEffect(() => {
@@ -189,6 +190,49 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
 
     loadWorkspacesData();
+
+    // Ask for notification permission if not asked yet
+    if ('Notification' in window && window.Notification.permission === 'default') {
+      window.Notification.requestPermission();
+    }
+
+    // Set up Realtime Subscription for Notifications
+    const notificationChannel = supabase
+      .channel('public:notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newNotif = payload.new as Notification;
+          // Update local state so it appears in the topbar immediately
+          setNotifications((prev) => {
+            // Prevent duplicates if triggerNotification already added it
+            if (prev.some(n => n.id === newNotif.id)) return prev;
+            return [newNotif, ...prev];
+          });
+
+          // Show browser popup
+          if ('Notification' in window && window.Notification.permission === 'granted') {
+            new window.Notification(newNotif.title, { body: newNotif.description });
+          }
+
+          // Show in-app visual toast
+          setActiveToast({ id: newNotif.id, title: newNotif.title, desc: newNotif.description });
+          setTimeout(() => {
+            setActiveToast(current => current?.id === newNotif.id ? null : current);
+          }, 5000);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(notificationChannel);
+    };
   }, [user]);
 
   // Load Workspaces data
@@ -689,7 +733,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       if (error) throw error;
 
-      if (taskData.assignee_id && user && taskData.assignee_id !== user.id) {
+      if (taskData.assignee_id && user) {
         const proj = projects.find(p => p.id === projectId);
         await triggerNotification(taskData.assignee_id, `New task assigned in ${proj?.name || 'Project'}`, `${user.full_name} assigned you: "${data.title}"`);
       }
@@ -906,14 +950,14 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         task = (dbState.tasks || []).find((t: any) => t.id === taskId);
       }
 
-      if (task && task.assignee_id && task.assignee_id !== user.id) {
+      if (task && task.assignee_id) {
         await triggerNotification(task.assignee_id, `New Comment on "${task.title}"`, `${user.full_name}: "${content.substring(0, 40)}${content.length > 40 ? '...' : ''}"`);
       }
 
       // Mention notifications
       members.forEach((member) => {
         const name = member.profile?.full_name;
-        if (name && content.toLowerCase().includes(`@${name.toLowerCase()}`) && member.user_id !== user.id) {
+        if (name && content.toLowerCase().includes(`@${name.toLowerCase()}`)) {
           triggerNotification(
             member.user_id,
             `Mentioned you in comment on "${task?.title || 'task'}"`,
@@ -1026,7 +1070,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       // Mention notifications in chat
       members.forEach((member) => {
         const name = member.profile?.full_name;
-        if (name && content.toLowerCase().includes(`@${name.toLowerCase()}`) && member.user_id !== user.id) {
+        if (name && content.toLowerCase().includes(`@${name.toLowerCase()}`)) {
           const proj = projects.find(p => p.id === projectId);
           triggerNotification(
             member.user_id,
@@ -1103,22 +1147,54 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const triggerNotification = async (userId: string, title: string, description: string) => {
     try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .insert({
-          user_id: userId,
-          title,
-          description,
-          is_read: false
-        })
-        .select()
-        .single();
+      // Build the notification object
+      const notifPayload = {
+        user_id: userId,
+        title,
+        description,
+        is_read: false
+      };
 
-      if (error) throw error;
-      
-      // Update local state if the notification targets the currently logged-in user
+      let savedNotif: any = null;
+
+      // Try inserting into Supabase/mock DB
+      // We only append `.select().maybeSingle()` if the notification is for the current user.
+      // If we insert a notification for someone else, the SELECT policy blocks the read and returns 403.
+      const query = supabase.from('notifications').insert(notifPayload);
+      const insertResult = (user && userId === user.id)
+        ? await query.select().maybeSingle()
+        : await query;
+
+      if (insertResult?.error) {
+        console.error('Notification insert error:', insertResult.error);
+      }
+
+      savedNotif = insertResult?.data || {
+        ...notifPayload,
+        id: 'notif_' + Math.random().toString(36).substr(2, 9),
+        created_at: new Date().toISOString()
+      };
+
+      // Always update local state for the current user
+      if (user && userId === user.id && savedNotif) {
+        setNotifications(prev => {
+          // Prevent duplicates
+          if (prev.some(n => n.id === savedNotif.id)) return prev;
+          return [savedNotif, ...prev];
+        });
+      }
+
+      // Always show in-app toast popup for current user
       if (user && userId === user.id) {
-        setNotifications(prev => [data, ...prev]);
+        setActiveToast({ id: savedNotif.id, title, desc: description });
+        setTimeout(() => {
+          setActiveToast(current => current?.id === savedNotif.id ? null : current);
+        }, 5000);
+      }
+
+      // Show browser desktop notification
+      if (user && userId === user.id && 'Notification' in window && window.Notification.permission === 'granted') {
+        new window.Notification(title, { body: description });
       }
     } catch (err) {
       console.error('Failed to send notification:', err);
@@ -1397,6 +1473,23 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       seedDatabase
     }}>
       {children}
+      
+      {/* In-App Notification Toast Pop-up */}
+      {activeToast && (
+        <div className="fixed bottom-6 right-6 z-[9999] animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-white dark:bg-slate-900 border border-brand-500/30 shadow-2xl shadow-brand-500/10 rounded-xl p-4 w-80 relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-1 h-full bg-brand-500"></div>
+            <button 
+              onClick={() => setActiveToast(null)}
+              className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            >
+              ×
+            </button>
+            <h4 className="font-bold text-sm text-slate-800 dark:text-white mb-1 pr-4">{activeToast.title}</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{activeToast.desc}</p>
+          </div>
+        </div>
+      )}
     </WorkspaceContext.Provider>
   );
 };

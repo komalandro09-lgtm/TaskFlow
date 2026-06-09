@@ -56,7 +56,7 @@ export const FirewallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .from('firewall_blocked_ips')
         .select('*')
         .eq('ip_address', clientIp)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         return { blocked: false };
@@ -98,7 +98,7 @@ export const FirewallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .from('firewall_blocked_ips')
         .select('*')
         .eq('ip_address', clientIp)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         await supabase
@@ -160,13 +160,13 @@ export const FirewallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .select('*')
         .eq('ip_address', clientIp)
         .eq('action', action)
-        .single();
+        .maybeSingle();
 
       const now = new Date();
 
       if (!rateData) {
         // First attempt for this IP + action
-        await supabase
+        const { error: insertError } = await supabase
           .from('firewall_rate_limits')
           .insert({
             ip_address: clientIp,
@@ -174,6 +174,12 @@ export const FirewallProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             attempt_count: 1,
             last_attempt_at: now.toISOString()
           });
+
+        if (insertError && insertError.code === '23505') {
+            // 23505 is unique violation code in Postgres. Meaning someone just inserted it concurrently.
+            // Let's just pretend we incremented it, or it will be handled on next request.
+            console.warn('Concurrent rate limit insert handled.');
+        }
 
         return { allowed: true, attemptsRemaining: config.max - 1 };
       }

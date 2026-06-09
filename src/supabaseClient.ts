@@ -459,8 +459,17 @@ export const mockSupabase = {
         dbState[table as keyof typeof dbState] = records;
         saveDb(dbState);
         
-        // Return matching format
-        return { data: isArray ? inserted : inserted[0], error: null };
+        const resultData = isArray ? inserted : inserted[0];
+        // Return a chainable object so .select().single()/.maybeSingle() works
+        const chainable = {
+          data: resultData,
+          error: null as any,
+          select: function(_fields?: string) { return this; },
+          single: function() { return { data: Array.isArray(this.data) ? this.data[0] : this.data, error: null }; },
+          maybeSingle: function() { return { data: Array.isArray(this.data) ? this.data[0] : this.data, error: null }; },
+          then: function(resolve: any) { resolve({ data: this.data, error: this.error }); }
+        };
+        return chainable;
       },
       
       update: async function(updateData: any) {
