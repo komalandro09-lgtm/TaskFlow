@@ -171,6 +171,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
+  -- Insert profile first
   INSERT INTO public.profiles (id, email, full_name, avatar_url)
   VALUES (
     new.id,
@@ -178,6 +179,19 @@ BEGIN
     COALESCE(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
     COALESCE(new.raw_user_meta_data->>'avatar_url', 'https://api.dicebear.com/7.x/initials/svg?seed=' || split_part(new.email, '@', 1))
   );
+
+  -- Copy pending invitations to workspace_members if the invitations table exists
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'workspace_invitations') THEN
+    INSERT INTO public.workspace_members (workspace_id, user_id, role, status)
+    SELECT workspace_id, new.id, role, 'pending'
+    FROM public.workspace_invitations
+    WHERE LOWER(email) = LOWER(new.email);
+
+    -- Clear claimed invitations
+    DELETE FROM public.workspace_invitations
+    WHERE LOWER(email) = LOWER(new.email);
+  END IF;
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -480,4 +494,34 @@ CREATE POLICY "Workspace managers/owners can manage team memberships" ON team_me
       )
     )
   );
+
+-- ==========================================
+-- 7. WORKSPACE INVITATIONS SYSTEM
+-- ==========================================
+
+-- Workspace Invitations Table
+CREATE TABLE IF NOT EXISTS public.workspace_invitations (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  workspace_id UUID REFERENCES public.workspaces(id) ON DELETE CASCADE NOT NULL,
+  email TEXT NOT NULL,
+  role TEXT DEFAULT 'member' CHECK (role IN ('owner', 'manager', 'member')) NOT NULL,
+  invited_by UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  UNIQUE (workspace_id, email)
+);
+
+-- Enable RLS
+ALTER TABLE public.workspace_invitations ENABLE ROW LEVEL SECURITY;
+
+-- Enable Policies
+CREATE POLICY "Workspace members can view invitations" ON public.workspace_invitations 
+  FOR SELECT USING (
+    public.is_workspace_member(workspace_id) OR public.is_workspace_owner(workspace_id)
+  );
+
+CREATE POLICY "Workspace managers/owners can manage invitations" ON public.workspace_invitations 
+  FOR ALL USING (
+    public.has_workspace_role(workspace_id, ARRAY['owner', 'manager']) OR public.is_workspace_owner(workspace_id)
+  );
+
 

@@ -378,7 +378,38 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
         return { ...member, profile };
       });
-      setMembers(memberList);
+
+      // Fetch pending workspace invitations for non-registered users (live mode only)
+      let guestMembers: any[] = [];
+      if (!isUsingMock) {
+        try {
+          const { data: inviteData } = await supabase
+            .from('workspace_invitations')
+            .select('*')
+            .eq('workspace_id', workspaceId);
+
+          if (inviteData) {
+            guestMembers = inviteData.map((inv: any) => ({
+              id: inv.id,
+              workspace_id: inv.workspace_id,
+              user_id: `invite_${inv.id}`,
+              role: inv.role,
+              status: 'pending',
+              is_guest_invite: true,
+              profile: {
+                id: `invite_${inv.id}`,
+                email: inv.email,
+                full_name: inv.email.split('@')[0] + ' (Invited Guest)',
+                avatar_url: `https://api.dicebear.com/7.x/initials/svg?seed=${inv.email.split('@')[0]}`
+              }
+            }));
+          }
+        } catch (err) {
+          console.error('Error fetching guest invitations:', err);
+        }
+      }
+
+      setMembers([...memberList, ...guestMembers]);
 
       // 2.5 Fetch teams
       const { data: teamData } = await supabase
@@ -598,6 +629,55 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         profile = (dbState.profiles || []).find((p: any) => p.email.toLowerCase() === email.toLowerCase());
       }
 
+      // If profile is not registered and we are in live Supabase mode, store guest invitation
+      if (!profile && !isUsingMock) {
+        const existingInvite = members.find(m => m.profile?.email.toLowerCase() === email.toLowerCase());
+        if (existingInvite) {
+          throw new Error('This email address has already been invited to this workspace.');
+        }
+
+        const { data, error } = await supabase
+          .from('workspace_invitations')
+          .insert({
+            workspace_id: activeWorkspace.id,
+            email: email.toLowerCase(),
+            role,
+            invited_by: user.id
+          })
+          .select()
+          .single();
+
+        if (error) {
+          if (error.code === '23505') {
+            throw new Error('This email address has already been invited to this workspace.');
+          }
+          throw error;
+        }
+
+        await logActivity('invited guest', 'member', email);
+        await refreshWorkspaceData();
+
+        const guestProfile = {
+          id: `invite_${data.id}`,
+          email: email.toLowerCase(),
+          full_name: email.split('@')[0] + ' (Guest)',
+          avatar_url: `https://api.dicebear.com/7.x/initials/svg?seed=${email.split('@')[0]}`
+        };
+
+        return {
+          member: {
+            id: data.id,
+            workspace_id: activeWorkspace.id,
+            user_id: `invite_${data.id}`,
+            role,
+            status: 'pending',
+            is_guest_invite: true,
+            profile: guestProfile
+          },
+          error: null
+        };
+      }
+
       let userId = '';
       let targetProfile = null;
 
@@ -605,11 +685,6 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         userId = profile.id;
         targetProfile = profile;
       } else {
-        // In live Supabase mode, the database expects a valid UUID that exists in profiles table
-        if (!isUsingMock) {
-          throw new Error('This email address is not registered on TaskFlow. Please ask them to sign up first!');
-        }
-
         // Simulating auto-creating a profile for the guest invitation in mock mode
         userId = 'user_' + Math.random().toString(36).substr(2, 9);
         targetProfile = {
@@ -656,17 +731,28 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const removeMember = async (memberId: string) => {
     try {
-      const member = members.find(m => m.id === memberId);
-      const name = member?.profile?.full_name || 'Unknown';
+      const guestInvite = members.find(m => m.id === memberId && (m as any).is_guest_invite);
+      if (guestInvite) {
+        const { error } = await supabase
+          .from('workspace_invitations')
+          .delete()
+          .eq('id', memberId);
 
-      const { error } = await supabase
-        .from('workspace_members')
-        .delete()
-        .eq('id', memberId);
+        if (error) throw error;
+        await logActivity('revoked invite', 'user', guestInvite.profile?.email || 'Unknown');
+      } else {
+        const member = members.find(m => m.id === memberId);
+        const name = member?.profile?.full_name || 'Unknown';
 
-      if (error) throw error;
+        const { error } = await supabase
+          .from('workspace_members')
+          .delete()
+          .eq('id', memberId);
 
-      await logActivity('removed member', 'user', name);
+        if (error) throw error;
+        await logActivity('removed member', 'user', name);
+      }
+
       await refreshWorkspaceData();
       return { error: null };
     } catch (error: any) {
@@ -677,17 +763,29 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const changeMemberRole = async (memberId: string, role: 'manager' | 'member') => {
     try {
-      const { error } = await supabase
-        .from('workspace_members')
-        .update({ role })
-        .eq('id', memberId);
+      const guestInvite = members.find(m => m.id === memberId && (m as any).is_guest_invite);
+      if (guestInvite) {
+        const { error } = await supabase
+          .from('workspace_invitations')
+          .update({ role })
+          .eq('id', memberId);
 
-      if (error) throw error;
+        if (error) throw error;
+        await logActivity('updated role to ' + role + ' for guest', 'member', guestInvite.profile?.email || 'Unknown');
+      } else {
+        const { error } = await supabase
+          .from('workspace_members')
+          .update({ role })
+          .eq('id', memberId);
 
-      const member = members.find(m => m.id === memberId);
-      if (member) {
-        await logActivity('updated role to ' + role + ' for', 'member', member.profile?.full_name || 'Unknown');
+        if (error) throw error;
+
+        const member = members.find(m => m.id === memberId);
+        if (member) {
+          await logActivity('updated role to ' + role + ' for', 'member', member.profile?.full_name || 'Unknown');
+        }
       }
+
       await refreshWorkspaceData();
       return { error: null };
     } catch (error: any) {
