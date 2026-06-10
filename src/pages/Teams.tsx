@@ -218,18 +218,18 @@ const Teams: React.FC = () => {
                   placeholder="e.g. Frontend Development"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm focus:border-brand-500 focus:outline-none"
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:border-brand-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-550 dark:text-slate-400">Description</label>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</label>
                 <textarea
                   placeholder="Briefly state this team's roadmap..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-805 bg-slate-50 dark:bg-slate-955 p-2.5 text-sm focus:border-brand-500 focus:outline-none resize-none"
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:border-brand-500 focus:outline-none resize-none"
                 />
               </div>
 
