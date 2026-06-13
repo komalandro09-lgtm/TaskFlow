@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../context/WorkspaceContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import type { Project } from '../context/WorkspaceContext';
 import { 
   FolderPlus, 
@@ -12,13 +13,18 @@ import {
   Filter,
   MoreVertical,
   Trash2,
-  Clock
+  Clock,
+  AlertCircle
 } from 'lucide-react';
 
 const Projects: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const { activeWorkspace, projects, createProject, deleteProject } = useWorkspace();
+  const { user } = useAuth();
+  const { activeWorkspace, projects, createProject, deleteProject, members } = useWorkspace();
+
+  const currentMemberRecord = (members || []).find(m => m.user_id === user?.id);
+  const isWorkspaceOwner = activeWorkspace?.owner_id === user?.id || currentMemberRecord?.role === 'owner';
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState('');
@@ -31,6 +37,7 @@ const Projects: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [activeProjectMenu, setActiveProjectMenu] = useState<string | null>(null);
+  const [createError, setCreateError] = useState('');
 
   if (!activeWorkspace) {
     return (
@@ -56,6 +63,14 @@ const Projects: React.FC = () => {
     e.preventDefault();
     if (!name.trim()) return;
 
+    setCreateError('');
+
+    // Validate date logic
+    if (startDate && dueDate && new Date(dueDate) < new Date(startDate)) {
+      setCreateError('Due Date cannot be before Start Date.');
+      return;
+    }
+
     const { project, error } = await createProject({
       name,
       description,
@@ -65,7 +80,9 @@ const Projects: React.FC = () => {
       status
     });
 
-    if (!error && project) {
+    if (error) {
+      setCreateError(error.message || 'Failed to create project.');
+    } else if (project) {
       setIsModalOpen(false);
       setName('');
       setDescription('');
@@ -120,7 +137,7 @@ const Projects: React.FC = () => {
           <p className="text-sm text-slate-500 dark:text-slate-400">Organize goals, align team members, and track dashboard progress.</p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => { setIsModalOpen(true); setCreateError(''); }}
           className="flex items-center gap-2 rounded-xl btn-brand px-4 py-2.5 text-sm font-bold shadow-lg shadow-brand-primary/20"
         >
           <FolderPlus size={16} />
@@ -183,29 +200,31 @@ const Projects: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="relative">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveProjectMenu(activeProjectMenu === project.id ? null : project.id);
-                    }}
-                    className="rounded-lg p-1 text-slate-450 dark:text-slate-500 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-750 dark:hover:text-slate-300"
-                  >
-                    <MoreVertical size={14} />
-                  </button>
+                {isWorkspaceOwner && (
+                  <div className="relative">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveProjectMenu(activeProjectMenu === project.id ? null : project.id);
+                      }}
+                      className="rounded-lg p-1 text-slate-450 dark:text-slate-500 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:text-slate-750 dark:hover:text-slate-300"
+                    >
+                      <MoreVertical size={14} />
+                    </button>
 
-                  {activeProjectMenu === project.id && (
-                    <div className="absolute right-0 z-20 mt-1 w-32 rounded-lg border border-violet-100 dark:border-slate-800 bg-white dark:bg-slate-950 p-1 shadow-2xl animate-dropdown">
-                      <button
-                        onClick={(e) => handleDelete(project.id, e)}
-                        className="flex w-full items-center gap-1.5 rounded px-2.5 py-1.5 text-left text-xs font-semibold text-rose-500 hover:bg-slate-50 dark:hover:bg-slate-900"
-                      >
-                        <Trash2 size={12} />
-                        <span>Delete Project</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
+                    {activeProjectMenu === project.id && (
+                      <div className="absolute right-0 z-20 mt-1 w-32 rounded-lg border border-violet-100 dark:border-slate-800 bg-white dark:bg-slate-950 p-1 shadow-2xl animate-dropdown">
+                        <button
+                          onClick={(e) => handleDelete(project.id, e)}
+                          className="flex w-full items-center gap-1.5 rounded px-2.5 py-1.5 text-left text-xs font-semibold text-rose-500 hover:bg-slate-50 dark:hover:bg-slate-900"
+                        >
+                          <Trash2 size={12} />
+                          <span>Delete Project</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Title & Desc */}
@@ -269,6 +288,23 @@ const Projects: React.FC = () => {
             </div>
             
             <form onSubmit={handleCreateProject} className="mt-4 space-y-4">
+              {createError && (
+                <div className="flex flex-col gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle size={16} className="stroke-[2.5] shrink-0 mt-0.5 text-rose-500" />
+                    <span>{createError}</span>
+                  </div>
+                  {createError.toLowerCase().includes('limit') && (
+                    <button
+                      type="button"
+                      onClick={() => navigate('/settings')}
+                      className="w-fit flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white rounded-xl px-3 py-1.5 font-bold text-[10px] shadow-sm transition-all"
+                    >
+                      Upgrade Workspace Plan
+                    </button>
+                  )}
+                </div>
+              )}
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-550 dark:text-slate-400">Project Name *</label>
                 <input
@@ -298,6 +334,7 @@ const Projects: React.FC = () => {
                   <input
                     type="date"
                     value={startDate}
+                    max={dueDate || undefined}
                     onChange={(e) => setStartDate(e.target.value)}
                     className="mt-1.5 w-full rounded-xl glass-input p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none [color-scheme:dark]"
                   />
@@ -307,6 +344,7 @@ const Projects: React.FC = () => {
                   <input
                     type="date"
                     value={dueDate}
+                    min={startDate || undefined}
                     onChange={(e) => setDueDate(e.target.value)}
                     className="mt-1.5 w-full rounded-xl glass-input p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none [color-scheme:dark]"
                   />

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFirewall } from '../context/FirewallContext';
-import { Mail, Lock, ShieldAlert, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ShieldAlert, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { TurnstileCaptcha } from '../components/shared/TurnstileCaptcha';
 import TaskFlowLogo from '../components/shared/TaskFlowLogo';
 
@@ -13,6 +13,7 @@ const Login: React.FC = () => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
@@ -81,254 +82,117 @@ const Login: React.FC = () => {
 
 
   return (
-    <div 
-      className="relative flex min-h-screen w-screen items-center justify-center px-4 py-16 overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #0f0720 0%, #1a0d38 40%, #0f0720 100%)' }}
-    >
-      {/* Ambient Orbs */}
-      <div 
-        className="absolute animate-float-slow pointer-events-none"
-        style={{
-          top: '-5%',
-          left: '-5%',
-          width: '55%',
-          height: '55%',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(139, 92, 246, 0.18) 0%, transparent 70%)',
-          filter: 'blur(40px)',
-        }}
-      />
-      <div 
-        className="absolute animate-float-slower pointer-events-none"
-        style={{
-          bottom: '-10%',
-          right: '-10%',
-          width: '60%',
-          height: '60%',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(244, 63, 94, 0.12) 0%, transparent 70%)',
-          filter: 'blur(50px)',
-        }}
-      />
-      <div 
-        className="absolute pointer-events-none"
-        style={{
-          top: '40%',
-          left: '30%',
-          width: '40%',
-          height: '40%',
-          borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(109, 40, 217, 0.1) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-        }}
-      />
+    <div className="relative flex min-h-screen w-screen items-center justify-center bg-slate-950 px-4 py-16 overflow-hidden">
+      {/* Background Ambient Lights */}
+      <div className="absolute top-[-10%] left-[-10%] h-[50%] w-[50%] rounded-full bg-brand-500/10 blur-[140px] pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] h-[50%] w-[50%] rounded-full bg-violet-600/10 blur-[140px] pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-cyan-500/5 blur-[120px] pointer-events-none"></div>
 
-      {/* Grid dot pattern */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-30"
-        style={{
-          backgroundImage: 'radial-gradient(circle, rgba(139, 92, 246, 0.3) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }}
-      />
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(transparent_1px,#020617_1px)] bg-[size:20px_20px] opacity-40 pointer-events-none"></div>
 
-      {/* Subtle horizontal line decorations */}
-      <div className="absolute inset-x-0 top-0 h-px pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent)' }} />
-      <div className="absolute inset-x-0 bottom-0 h-px pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.2), transparent)' }} />
-
-      <div className="z-10 w-full max-w-[420px]" style={{ animation: 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
+      <div className="z-10 w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
         {/* Brand Header */}
-        <div className="mb-8 text-center flex flex-col items-center">
-          <TaskFlowLogo variant="full-tagline" iconSize={52} textSize={26} />
+        <div className="mb-8 text-center flex flex-col items-center gap-3">
+          <TaskFlowLogo variant="full" iconSize={44} textSize={22} />
+          <h2 className="text-2xl font-extrabold tracking-tight" style={{ color: 'white', fontFamily: "'Outfit', sans-serif", letterSpacing: '-0.02em' }}>
+            Welcome Back
+          </h2>
+          <p className="text-sm font-medium" style={{ color: 'rgba(196, 181, 253, 0.65)' }}>
+            Sign in to your workspace
+          </p>
         </div>
 
         {/* Login Card */}
-        <div 
-          className="relative rounded-3xl p-8 overflow-hidden group"
-          style={{
-            background: 'rgba(26, 14, 53, 0.85)',
-            border: '1px solid rgba(139, 92, 246, 0.2)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 24px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-          }}
-        >
-          {/* Card top gradient shimmer */}
-          <div 
-            className="absolute top-0 inset-x-0 h-px pointer-events-none"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), rgba(244, 63, 94, 0.3), transparent)' }}
-          />
-          
-          {/* Hover glow effect */}
-          <div 
-            className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 70%)' }}
-          />
+        <div className="relative rounded-3xl border border-slate-800/80 bg-slate-900/40 p-8 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:border-slate-700/60 group overflow-hidden">
+          {/* Card Border Glow */}
+          <div className="absolute -inset-px bg-gradient-to-r from-brand-500/20 to-violet-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
-          <div className="relative z-10">
-            <h2 className="text-xl font-bold mb-1.5" style={{ color: '#f0ecff', fontFamily: "'Outfit', sans-serif", letterSpacing: '-0.02em' }}>
-              Welcome back
-            </h2>
-            <p className="text-xs mb-6" style={{ color: 'rgba(167, 139, 250, 0.55)' }}>
-              Sign in to your workspace
-            </p>
+          {errorMsg && (
+            <div className="relative mb-5 flex items-start gap-2.5 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4 text-xs font-semibold text-rose-400 leading-relaxed animate-in slide-in-from-top-2 duration-300">
+              <ShieldAlert size={18} className="shrink-0 text-rose-400 mt-0.5" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
 
-            {errorMsg && (
-              <div 
-                className="mb-5 flex items-start gap-2.5 rounded-2xl p-4 text-xs font-semibold leading-relaxed"
-                style={{
-                  background: 'rgba(244, 63, 94, 0.08)',
-                  border: '1px solid rgba(244, 63, 94, 0.2)',
-                  color: '#fb7185',
-                  animation: 'fadeInUp 0.3s ease forwards',
-                }}
-              >
-                <ShieldAlert size={16} className="shrink-0 mt-0.5" />
-                <span>{errorMsg}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'rgba(167, 139, 250, 0.65)' }}>
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail 
-                    className="absolute left-4 top-3.5 pointer-events-none transition-colors duration-200" 
-                    size={15} 
-                    style={{ color: 'rgba(139, 92, 246, 0.5)' }}
-                  />
-                  <input
-                    id="login-email"
-                    type="email"
-                    required
-                    placeholder="name@company.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm placeholder-violet-800 focus:outline-none transition-all duration-200"
-                    style={{
-                      background: 'rgba(139, 92, 246, 0.08)',
-                      border: '1px solid rgba(139, 92, 246, 0.18)',
-                      color: '#e2e0ff',
-                    }}
-                    onFocus={e => {
-                      (e.target as HTMLElement).style.borderColor = 'rgba(139, 92, 246, 0.5)';
-                      (e.target as HTMLElement).style.background = 'rgba(139, 92, 246, 0.12)';
-                      (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
-                    }}
-                    onBlur={e => {
-                      (e.target as HTMLElement).style.borderColor = 'rgba(139, 92, 246, 0.18)';
-                      (e.target as HTMLElement).style.background = 'rgba(139, 92, 246, 0.08)';
-                      (e.target as HTMLElement).style.boxShadow = 'none';
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-[11px] font-bold uppercase tracking-wider" style={{ color: 'rgba(167, 139, 250, 0.65)' }}>
-                    Password
-                  </label>
-                  <Link 
-                    to="/forgot-password" 
-                    id="forgot-password-link" 
-                    className="text-xs font-semibold transition-colors"
-                    style={{ color: '#a78bfa' }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#c4b5fd'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#a78bfa'}
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Lock 
-                    className="absolute left-4 top-3.5 pointer-events-none" 
-                    size={15} 
-                    style={{ color: 'rgba(139, 92, 246, 0.5)' }}
-                  />
-                  <input
-                    id="login-password"
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-2xl py-3.5 pl-11 pr-4 text-sm placeholder-violet-800 focus:outline-none transition-all duration-200"
-                    style={{
-                      background: 'rgba(139, 92, 246, 0.08)',
-                      border: '1px solid rgba(139, 92, 246, 0.18)',
-                      color: '#e2e0ff',
-                    }}
-                    onFocus={e => {
-                      (e.target as HTMLElement).style.borderColor = 'rgba(139, 92, 246, 0.5)';
-                      (e.target as HTMLElement).style.background = 'rgba(139, 92, 246, 0.12)';
-                      (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
-                    }}
-                    onBlur={e => {
-                      (e.target as HTMLElement).style.borderColor = 'rgba(139, 92, 246, 0.18)';
-                      (e.target as HTMLElement).style.background = 'rgba(139, 92, 246, 0.08)';
-                      (e.target as HTMLElement).style.boxShadow = 'none';
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Firewall Security Bot Protection CAPTCHA */}
-              <div className="py-1 relative z-20">
-                <TurnstileCaptcha 
-                  action="login" 
-                  onVerify={(token) => setCaptchaToken(token)} 
+          <form onSubmit={handleSubmit} className="relative space-y-5">
+            <div>
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Email Address</label>
+              <div className="relative mt-2">
+                <Mail className="absolute left-4 top-3.5 text-slate-500 transition-colors group-focus-within:text-brand-400" size={16} />
+                <input
+                  id="login-email"
+                  type="email"
+                  required
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-800 bg-slate-950/80 py-3.5 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-605 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 focus:outline-none transition-all duration-200"
                 />
               </div>
+            </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="relative flex w-full items-center justify-center rounded-2xl py-3.5 text-sm font-bold text-white transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                style={{
-                  background: loading ? 'rgba(109, 40, 217, 0.7)' : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 60%, #6d28d9 100%)',
-                  boxShadow: loading ? 'none' : '0 8px 30px rgba(109, 40, 217, 0.45)',
-                }}
-                onMouseEnter={e => {
-                  if (!loading) {
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(109, 40, 217, 0.55)';
-                  }
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                  (e.currentTarget as HTMLElement).style.boxShadow = loading ? 'none' : '0 8px 30px rgba(109, 40, 217, 0.45)';
-                }}
-              >
-                {/* Button shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full hover:translate-x-full transition-transform duration-700 pointer-events-none" />
-                {loading ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    Sign In <ArrowRight size={15} />
-                  </span>
-                )}
-              </button>
-            </form>
+            <div>
+              <div className="flex items-center justify-between">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Password</label>
+                <Link 
+                  to="/forgot-password" 
+                  id="forgot-password-link" 
+                  className="text-xs font-semibold text-brand-400 hover:text-brand-300 transition-colors"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
+              <div className="relative mt-2">
+                <Lock className="absolute left-4 top-3.5 text-slate-500 transition-colors group-focus-within:text-brand-400" size={16} />
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-800 bg-slate-950/80 py-3.5 pl-11 pr-11 text-sm text-slate-200 placeholder-slate-605 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 focus:outline-none transition-all duration-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-3.5 text-slate-500 hover:text-slate-350 transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
+            {/* Firewall Security Bot Protection CAPTCHA */}
+            <div className="py-1 relative z-20">
+              <TurnstileCaptcha 
+                action="login" 
+                onVerify={(token) => setCaptchaToken(token)} 
+              />
+            </div>
 
-          </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="relative flex w-full items-center justify-center rounded-2xl bg-brand-600 py-3.5 text-sm font-semibold text-white hover:bg-brand-500 transition-all duration-200 shadow-xl shadow-brand-500/20 hover:shadow-brand-500/30 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 disabled:hover:shadow-none"
+            >
+              {loading ? (
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  Sign In <ArrowRight size={16} className="transition-transform duration-200" />
+                </span>
+              )}
+            </button>
+          </form>
         </div>
 
         {/* Footer Link */}
-        <p className="mt-7 text-center text-sm font-medium" style={{ color: 'rgba(167, 139, 250, 0.55)' }}>
+        <p className="mt-8 text-center text-sm text-slate-400 font-medium">
           Don't have an account?{' '}
-          <Link 
-            to="/register" 
-            id="create-account-link" 
-            className="font-bold transition-colors"
-            style={{ color: '#a78bfa' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#c4b5fd'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#a78bfa'}
-          >
-            Create Account →
+          <Link to="/register" id="create-account-link" className="font-semibold text-brand-400 hover:text-brand-300 transition-colors">
+            Create Account
           </Link>
         </p>
       </div>

@@ -348,9 +348,20 @@ const Members: React.FC = () => {
             ) : (
               <form onSubmit={handleInvite} className="mt-5 space-y-5">
                 {inviteError && (
-                  <div className="flex items-start gap-2.5 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4 text-[11px] font-semibold text-rose-550 dark:text-rose-455">
-                    <AlertCircle size={16} className="stroke-[2.5] shrink-0 mt-0.5" />
-                    <span>{inviteError}</span>
+                  <div className="flex flex-col gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                    <div className="flex items-start gap-2.5">
+                      <AlertCircle size={16} className="stroke-[2.5] shrink-0 mt-0.5 text-rose-500" />
+                      <span>{inviteError}</span>
+                    </div>
+                    {inviteError.toLowerCase().includes('limit') && (
+                      <button
+                        type="button"
+                        onClick={() => navigate('/settings')}
+                        className="w-fit flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white rounded-xl px-3 py-1.5 font-bold text-[10px] shadow-sm transition-all"
+                      >
+                        Upgrade Workspace Plan
+                      </button>
+                    )}
                   </div>
                 )}
 

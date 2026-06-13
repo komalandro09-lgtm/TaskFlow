@@ -10,7 +10,16 @@ export interface Workspace {
   logo_url: string;
   owner_id: string;
   created_at: string;
+  plan?: 'Free' | 'Starter' | 'Pro' | 'Enterprise';
+  subscription_status?: 'active' | 'cancelled' | 'expired';
 }
+
+export const PLAN_LIMITS = {
+  Free: { projects: 9999, members: 9999, workspaces: 9999 },
+  Starter: { projects: 9999, members: 9999, workspaces: 9999 },
+  Pro: { projects: 9999, members: 9999, workspaces: 9999 },
+  Enterprise: { projects: 9999, members: 9999, workspaces: 9999 }
+};
 
 export interface WorkspaceMember {
   id: string;
@@ -596,6 +605,14 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const createWorkspace = async (name: string, description: string, logoUrl: string) => {
     try {
       if (!user) throw new Error('Not authenticated');
+
+      if (workspaces.length > 0) {
+        const currentPlan = activeWorkspace?.plan || 'Free';
+        const limits = PLAN_LIMITS[currentPlan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.Free;
+        if (workspaces.length >= limits.workspaces) {
+          throw new Error(`Workspace limit reached. Your current plan (${currentPlan}) only allows up to ${limits.workspaces} workspace(s). Please upgrade to create more workspaces.`);
+        }
+      }
       
       const { data, error } = await supabase
         .from('workspaces')
@@ -603,7 +620,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           name,
           description,
           logo_url: logoUrl || `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60`,
-          owner_id: user.id
+          owner_id: user.id,
+          plan: 'Free',
+          subscription_status: 'active'
         })
         .select()
         .single();
@@ -650,6 +669,12 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const createProject = async (projectData: Omit<Project, 'id' | 'workspace_id' | 'created_at'>) => {
     try {
       if (!activeWorkspace || !user) throw new Error('No active workspace or user');
+
+      const currentPlan = activeWorkspace.plan || 'Free';
+      const limits = PLAN_LIMITS[currentPlan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.Free;
+      if (projects.length >= limits.projects) {
+        throw new Error(`Project limit reached. Your workspace is on the ${currentPlan} plan, which only allows up to ${limits.projects} projects. Please upgrade your plan in settings to create more projects.`);
+      }
 
       // Sanitize date fields: convert empty strings to null to avoid Supabase DATE type rejection (400 error)
       const sanitizedData = {
@@ -707,12 +732,50 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const project = projects.find(p => p.id === projectId);
       const name = project ? project.name : 'Unknown';
 
-      const { error } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', projectId);
+      // Security check: only the workspace owner is allowed to delete projects
+      const currentMemberRecord = members.find(m => m.user_id === user?.id);
+      const isWorkspaceOwner = activeWorkspace?.owner_id === user?.id || currentMemberRecord?.role === 'owner';
 
-      if (error) throw error;
+      if (!isWorkspaceOwner) {
+        throw new Error('Unauthorized: Only the workspace owner can delete projects.');
+      }
+
+      if (isUsingMock) {
+        const dbData = localStorage.getItem('taskflow_mock_db');
+        if (dbData) {
+          const db = JSON.parse(dbData);
+
+          // 1. Delete project
+          db.projects = (db.projects || []).filter((p: any) => p.id !== projectId);
+
+          // 2. Delete project members
+          db.project_members = (db.project_members || []).filter((pm: any) => pm.project_id !== projectId);
+
+          // 3. Find tasks of this project
+          const projectTasks = (db.tasks || []).filter((t: any) => t.project_id === projectId);
+          const projectTaskIds = projectTasks.map((t: any) => t.id);
+
+          // 4. Delete tasks
+          db.tasks = (db.tasks || []).filter((t: any) => t.project_id !== projectId);
+
+          // 5. Delete checklists, comments, attachments
+          db.checklists = (db.checklists || []).filter((c: any) => !projectTaskIds.includes(c.task_id));
+          db.comments = (db.comments || []).filter((cm: any) => !projectTaskIds.includes(cm.task_id));
+          db.attachments = (db.attachments || []).filter((att: any) => !projectTaskIds.includes(att.task_id));
+
+          // 6. Delete project messages
+          db.project_messages = (db.project_messages || []).filter((msg: any) => msg.project_id !== projectId);
+
+          localStorage.setItem('taskflow_mock_db', JSON.stringify(db));
+        }
+      } else {
+        const { error } = await supabase
+          .from('projects')
+          .delete()
+          .eq('id', projectId);
+
+        if (error) throw error;
+      }
 
       await logActivity('deleted', 'project', name);
       await refreshWorkspaceData();
@@ -821,6 +884,12 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const inviteMember = async (email: string, role: 'manager' | 'member') => {
     try {
       if (!activeWorkspace || !user) throw new Error('No active workspace');
+
+      const currentPlan = activeWorkspace.plan || 'Free';
+      const limits = PLAN_LIMITS[currentPlan as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.Free;
+      if (members.length >= limits.members) {
+        throw new Error(`Member limit reached. Your workspace is on the ${currentPlan} plan, which only allows up to ${limits.members} collaborators. Please upgrade your plan in settings to invite more members.`);
+      }
       const normalizedEmail = email.trim().toLowerCase();
 
       // Check if already invited or member of the workspace

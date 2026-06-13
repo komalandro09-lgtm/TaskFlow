@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS workspaces (
   description TEXT,
   logo_url TEXT,
   owner_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  plan TEXT DEFAULT 'Free' CHECK (plan IN ('Free', 'Starter', 'Pro', 'Enterprise')) NOT NULL,
+  subscription_status TEXT DEFAULT 'active' CHECK (subscription_status IN ('active', 'cancelled', 'expired')) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 

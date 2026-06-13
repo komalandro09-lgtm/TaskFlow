@@ -21,6 +21,11 @@ import {
   Globe,
   Lock,
   BarChart3,
+  Check,
+  X,
+  Rocket,
+  Building2,
+  Crown,
 } from 'lucide-react';
 import TaskFlowLogo from '../components/shared/TaskFlowLogo';
 
@@ -102,10 +107,10 @@ const stats = [
 ];
 
 const steps = [
-  { step: '01', title: 'Create Workspace', desc: 'Set up your workspace in seconds. Invite your team and configure roles.' },
-  { step: '02', title: 'Launch Projects', desc: 'Create projects, set priorities and deadlines, and assign them to teams.' },
-  { step: '03', title: 'Track Progress', desc: 'Monitor task completion, project milestones, and team performance live.' },
-  { step: '04', title: 'Ship Faster', desc: 'Use insights, notifications, and collaboration tools to hit every deadline.' },
+  { step: '01', title: 'Create Workspace', desc: 'Set up your workspace in seconds. Invite your team and configure roles.', icon: Rocket },
+  { step: '02', title: 'Launch Projects', desc: 'Create projects, set priorities and deadlines, and assign them to teams.', icon: FolderKanban },
+  { step: '03', title: 'Track Progress', desc: 'Monitor task completion, project milestones, and team performance live.', icon: BarChart3 },
+  { step: '04', title: 'Ship Faster', desc: 'Use insights, notifications, and collaboration tools to hit every deadline.', icon: Zap },
 ];
 
 const testimonials = [
@@ -135,18 +140,116 @@ const testimonials = [
   },
 ];
 
-const navLinks = ['Features', 'How It Works', 'Testimonials', 'Pricing'];
+const pricingPlans = [
+  {
+    name: 'Free',
+    icon: Zap,
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    description: 'Perfect for individuals and small experiments.',
+    color: '#6d28d9',
+    accentBg: 'rgba(109,40,217,0.06)',
+    features: [
+      { text: '1 Workspace', included: true },
+      { text: '3 Projects', included: true },
+      { text: 'Up to 3 Members', included: true },
+      { text: 'Basic Task Management', included: true },
+      { text: 'Activity Logs', included: true },
+      { text: 'Priority Support', included: false },
+      { text: 'Custom Roles', included: false },
+      { text: 'Advanced Analytics', included: false },
+    ],
+    cta: 'Get Start',
+    popular: false,
+  },
+  {
+    name: 'Starter',
+    icon: Rocket,
+    monthlyPrice: 750,
+    yearlyPrice: 580,
+    description: 'For growing teams ready to scale their workflow.',
+    color: '#8b5cf6',
+    accentBg: 'rgba(139,92,246,0.06)',
+    features: [
+      { text: '3 Workspaces', included: true },
+      { text: '15 Projects', included: true },
+      { text: 'Up to 10 Members', included: true },
+      { text: 'Advanced Task Management', included: true },
+      { text: 'Activity Logs', included: true },
+      { text: 'Email Support', included: true },
+      { text: 'Custom Roles', included: false },
+      { text: 'Advanced Analytics', included: false },
+    ],
+    cta: 'Start Free Trial',
+    popular: false,
+  },
+  {
+    name: 'Pro',
+    icon: Crown,
+    monthlyPrice: 1500,
+    yearlyPrice: 1200,
+    description: 'For power teams that demand maximum performance.',
+    color: '#7c3aed',
+    accentBg: 'rgba(124,58,237,0.06)',
+    features: [
+      { text: 'Unlimited Workspaces', included: true },
+      { text: 'Unlimited Projects', included: true },
+      { text: 'Unlimited Members', included: true },
+      { text: 'Advanced Task Management', included: true },
+      { text: 'Activity Logs & Audit Trail', included: true },
+      { text: 'Priority Support', included: true },
+      { text: 'Custom Roles & Permissions', included: true },
+      { text: 'Advanced Analytics', included: true },
+    ],
+    cta: 'Start Free Trial',
+    popular: true,
+  },
+  {
+    name: 'Enterprise',
+    icon: Building2,
+    monthlyPrice: null,
+    yearlyPrice: null,
+    description: 'Custom solutions for large-scale organizations.',
+    color: '#4c1d95',
+    accentBg: 'rgba(76,29,149,0.06)',
+    features: [
+      { text: 'Everything in Pro', included: true },
+      { text: 'SSO / SAML Integration', included: true },
+      { text: 'Dedicated Account Manager', included: true },
+      { text: 'Custom Integrations', included: true },
+      { text: 'SLA & Uptime Guarantee', included: true },
+      { text: 'On-Premise Deployment Option', included: true },
+      { text: 'Security Audit & Compliance', included: true },
+      { text: 'White-label Option', included: true },
+    ],
+    cta: 'Contact Sales',
+    popular: false,
+  },
+];
+
+const navLinks = ['Features', 'How It Works', 'Testimonials'];
+
+const logoStrip = [
+  'NovaTech', 'ScaleUp', 'BuildCraft', 'DevForge', 'CloudStack',
+  'Nexora', 'PulseIO', 'HyperLab', 'PixelStudio', 'VaultAI',
+];
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 const Homepage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const getPrice = (plan: typeof pricingPlans[0]) => {
+    if (plan.monthlyPrice === null) return null;
+    return billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
+  };
 
   return (
     <div
@@ -255,7 +358,7 @@ const Homepage: React.FC = () => {
                 (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(139,92,246,0.4)';
               }}
             >
-              Get Started Free <ArrowRight size={14} />
+              Get Start <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -272,6 +375,7 @@ const Homepage: React.FC = () => {
           overflow: 'hidden',
           background: 'linear-gradient(135deg, #faf8ff 0%, #f0ecff 50%, #ede9fe 100%)',
           paddingTop: 100,
+          paddingBottom: 60,
         }}
       >
         {/* Ambient orbs */}
@@ -300,133 +404,214 @@ const Homepage: React.FC = () => {
           }}
         />
 
-        <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          {/* Badge */}
-          <div
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)',
-              borderRadius: 30, padding: '6px 18px', marginBottom: 32,
-              animation: 'fadeInUp 0.6s ease forwards',
-            }}
-          >
-            <Sparkles size={14} style={{ color: '#8b5cf6' }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#6d28d9', letterSpacing: '0.01em' }}>
-              The Modern Project Management Platform
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1
-            style={{
-              fontSize: 'clamp(40px, 6vw, 72px)',
-              fontFamily: "'Outfit', sans-serif",
-              fontWeight: 800,
-              lineHeight: 1.1,
-              letterSpacing: '-0.03em',
-              color: '#1e1b4b',
-              marginBottom: 24,
-              animation: 'fadeInUp 0.7s 0.1s ease both',
-            }}
-          >
-            Collaborate, Track &{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Ship Faster
-            </span>
-          </h1>
-
-          {/* Sub */}
-          <p
-            style={{
-              fontSize: 'clamp(16px, 2vw, 20px)',
-              color: 'rgba(109,40,217,0.65)',
-              lineHeight: 1.7,
-              maxWidth: 620,
-              margin: '0 auto 40px',
-              fontWeight: 500,
-              animation: 'fadeInUp 0.7s 0.2s ease both',
-            }}
-          >
-            TaskFlow brings your teams, projects, and tasks into one unified workspace.
-            Real-time collaboration, enterprise security, and beautiful design — all in one.
-          </p>
-
-          {/* CTAs */}
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 16, flexWrap: 'wrap',
-              animation: 'fadeInUp 0.7s 0.3s ease both',
-            }}
-          >
-            <Link
-              to="/register"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-                color: 'white', fontWeight: 700, fontSize: 16,
-                padding: '14px 32px', borderRadius: 14, textDecoration: 'none',
-                boxShadow: '0 8px 32px rgba(139,92,246,0.45)',
-                transition: 'all 0.25s',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(139,92,246,0.55)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(139,92,246,0.45)';
-              }}
-            >
-              Start for Free <ArrowRight size={18} />
-            </Link>
-            <a
-              href="#how-it-works"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                background: 'rgba(139,92,246,0.08)',
-                border: '1.5px solid rgba(139,92,246,0.25)',
-                color: '#6d28d9', fontWeight: 700, fontSize: 15,
-                padding: '13px 28px', borderRadius: 14, textDecoration: 'none',
-                transition: 'all 0.25s',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.14)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.08)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(139,92,246,0.25)';
-              }}
-            >
-              <Play size={16} fill="#6d28d9" /> See How It Works
-            </a>
-          </div>
-
-          {/* Trust indicators */}
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 28, marginTop: 48, flexWrap: 'wrap',
-              animation: 'fadeInUp 0.7s 0.4s ease both',
-            }}
-          >
-            {[
-              { icon: CheckCircle2, text: 'Free forever plan' },
-              { icon: Shield, text: 'SOC2 compliant' },
-              { icon: Zap, text: 'No credit card needed' },
-            ].map(({ icon: Icon, text }) => (
-              <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Icon size={15} style={{ color: '#8b5cf6' }} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(109,40,217,0.7)' }}>{text}</span>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 1, width: '100%' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'center' }}>
+            {/* Left: copy */}
+            <div>
+              {/* Badge */}
+              <div
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)',
+                  borderRadius: 30, padding: '6px 18px', marginBottom: 28,
+                  animation: 'fadeInUp 0.6s ease forwards',
+                }}
+              >
+                <Sparkles size={14} style={{ color: '#8b5cf6' }} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#6d28d9', letterSpacing: '0.01em' }}>
+                  The Modern Project Management Platform
+                </span>
               </div>
-            ))}
+
+              {/* Headline */}
+              <h1
+                style={{
+                  fontSize: 'clamp(36px, 5vw, 60px)',
+                  fontFamily: "'Outfit', sans-serif",
+                  fontWeight: 800,
+                  lineHeight: 1.1,
+                  letterSpacing: '-0.03em',
+                  color: '#1e1b4b',
+                  marginBottom: 22,
+                  animation: 'fadeInUp 0.7s 0.1s ease both',
+                }}
+              >
+                Collaborate, Track &{' '}
+                <span
+                  style={{
+                    background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  Ship Faster
+                </span>
+              </h1>
+
+              {/* Sub */}
+              <p
+                style={{
+                  fontSize: 18,
+                  color: 'rgba(109,40,217,0.65)',
+                  lineHeight: 1.7,
+                  marginBottom: 36,
+                  fontWeight: 500,
+                  animation: 'fadeInUp 0.7s 0.2s ease both',
+                }}
+              >
+                TaskFlow brings your teams, projects, and tasks into one unified workspace.
+                Real-time collaboration, enterprise security, and beautiful design — all in one.
+              </p>
+
+              {/* CTAs */}
+              <div
+                style={{
+                  display: 'flex', alignItems: 'center',
+                  gap: 16, flexWrap: 'wrap',
+                  animation: 'fadeInUp 0.7s 0.3s ease both',
+                }}
+              >
+                <Link
+                  to="/register"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                    color: 'white', fontWeight: 700, fontSize: 16,
+                    padding: '14px 30px', borderRadius: 14, textDecoration: 'none',
+                    boxShadow: '0 8px 32px rgba(139,92,246,0.45)',
+                    transition: 'all 0.25s',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(139,92,246,0.55)';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(139,92,246,0.45)';
+                  }}
+                >
+                  Start for Free <ArrowRight size={18} />
+                </Link>
+                <a
+                  href="#how-it-works"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    background: 'rgba(139,92,246,0.08)',
+                    border: '1.5px solid rgba(139,92,246,0.25)',
+                    color: '#6d28d9', fontWeight: 700, fontSize: 15,
+                    padding: '13px 26px', borderRadius: 14, textDecoration: 'none',
+                    transition: 'all 0.25s',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.14)';
+                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.08)';
+                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(139,92,246,0.25)';
+                  }}
+                >
+                  <Play size={16} fill="#6d28d9" /> See How It Works
+                </a>
+              </div>
+
+              {/* Trust indicators */}
+              <div
+                style={{
+                  display: 'flex', alignItems: 'center',
+                  gap: 24, marginTop: 36, flexWrap: 'wrap',
+                  animation: 'fadeInUp 0.7s 0.4s ease both',
+                }}
+              >
+                {[
+                  { icon: CheckCircle2, text: 'Free forever plan' },
+                  { icon: Shield, text: 'SOC2 compliant' },
+                  { icon: Zap, text: 'No credit card needed' },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Icon size={15} style={{ color: '#8b5cf6' }} />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(109,40,217,0.7)' }}>{text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: mock app preview */}
+            <div style={{ position: 'relative', animation: 'fadeInUp 0.8s 0.2s ease both' }}>
+              <div
+                style={{
+                  borderRadius: 24, overflow: 'hidden',
+                  background: 'linear-gradient(135deg, #1e0f3d, #0f0720)',
+                  border: '1px solid rgba(139,92,246,0.3)',
+                  boxShadow: '0 32px 100px rgba(109,40,217,0.3), 0 4px 20px rgba(0,0,0,0.2)',
+                  padding: 24,
+                }}
+              >
+                {/* Mock topbar */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#f43f5e' }} />
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#f59e0b' }} />
+                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#10b981' }} />
+                  <div style={{ flex: 1, height: 8, borderRadius: 4, background: 'rgba(139,92,246,0.15)', marginLeft: 12 }} />
+                </div>
+
+                {/* Mock stats */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                  {[
+                    { label: 'Active Projects', val: '24', color: '#8b5cf6' },
+                    { label: 'Tasks Done', val: '187', color: '#10b981' },
+                    { label: 'Team Members', val: '12', color: '#f59e0b' },
+                    { label: 'On Track', val: '96%', color: '#6d28d9' },
+                  ].map(s => (
+                    <div key={s.label} style={{ background: 'rgba(139,92,246,0.1)', borderRadius: 12, padding: '14px 16px', border: '1px solid rgba(139,92,246,0.15)' }}>
+                      <div style={{ fontSize: 22, fontWeight: 800, color: s.color, fontFamily: "'Outfit', sans-serif" }}>{s.val}</div>
+                      <div style={{ fontSize: 11, color: 'rgba(167,139,250,0.7)', marginTop: 2 }}>{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Mock project list */}
+                {['Q3 Product Roadmap', 'Website Redesign', 'Mobile App v2.0'].map((proj, i) => (
+                  <div key={proj} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 10, background: 'rgba(139,92,246,0.07)', marginBottom: 8, border: '1px solid rgba(139,92,246,0.1)' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: ['#8b5cf6', '#10b981', '#f59e0b'][i] }} />
+                    <div style={{ flex: 1, fontSize: 12, color: '#c4b5fd', fontWeight: 600 }}>{proj}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(167,139,250,0.5)', background: 'rgba(139,92,246,0.1)', padding: '2px 8px', borderRadius: 6 }}>
+                      {['Active', 'Review', 'In Progress'][i]}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Floating badges */}
+              <div
+                style={{
+                  position: 'absolute', bottom: -16, right: -16,
+                  background: 'white', borderRadius: 14, padding: '12px 20px',
+                  boxShadow: '0 8px 32px rgba(109,40,217,0.18)',
+                  border: '1px solid rgba(139,92,246,0.15)',
+                  display: 'flex', alignItems: 'center', gap: 10,
+                }}
+              >
+                <TrendingUp size={20} style={{ color: '#10b981' }} />
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: '#1e1b4b' }}>+38%</div>
+                  <div style={{ fontSize: 11, color: 'rgba(109,40,217,0.55)', fontWeight: 600 }}>Team velocity</div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  position: 'absolute', top: -16, left: -16,
+                  background: 'white', borderRadius: 14, padding: '10px 16px',
+                  boxShadow: '0 8px 32px rgba(109,40,217,0.18)',
+                  border: '1px solid rgba(139,92,246,0.15)',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                }}
+              >
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px #10b981' }} />
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#1e1b4b' }}>12 online now</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -449,6 +634,41 @@ const Homepage: React.FC = () => {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ── LOGO STRIP ── */}
+      <section style={{ background: '#faf8ff', padding: '40px 0', borderBottom: '1px solid rgba(139,92,246,0.08)', overflow: 'hidden' }}>
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(109,40,217,0.45)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            Trusted by teams at
+          </span>
+        </div>
+        <div
+          style={{
+            display: 'flex', gap: 48, alignItems: 'center',
+            animation: 'marquee 30s linear infinite',
+            width: 'max-content',
+          }}
+        >
+          {[...logoStrip, ...logoStrip].map((name, i) => (
+            <div
+              key={`${name}-${i}`}
+              style={{
+                fontSize: 16, fontWeight: 800, color: 'rgba(109,40,217,0.3)',
+                fontFamily: "'Outfit', sans-serif", letterSpacing: '-0.02em',
+                whiteSpace: 'nowrap', userSelect: 'none',
+              }}
+            >
+              {name}
+            </div>
+          ))}
+        </div>
+        <style>{`
+          @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+          }
+        `}</style>
       </section>
 
       {/* ── FEATURES ── */}
@@ -564,15 +784,27 @@ const Homepage: React.FC = () => {
                   (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(109,40,217,0.07)';
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 36, fontFamily: "'Outfit', sans-serif", fontWeight: 800,
-                    background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                    marginBottom: 16, lineHeight: 1,
-                  }}
-                >
-                  {step.step}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                  <div
+                    style={{
+                      width: 44, height: 44, borderRadius: 12,
+                      background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(109,40,217,0.06))',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: '1px solid rgba(139,92,246,0.15)',
+                    }}
+                  >
+                    <step.icon size={20} style={{ color: '#8b5cf6' }} />
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 28, fontFamily: "'Outfit', sans-serif", fontWeight: 800,
+                      background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+                      WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                      lineHeight: 1,
+                    }}
+                  >
+                    {step.step}
+                  </div>
                 </div>
                 <h3 style={{ fontSize: 17, fontFamily: "'Outfit', sans-serif", fontWeight: 700, color: '#1e1b4b', marginBottom: 10 }}>
                   {step.title}
@@ -706,6 +938,9 @@ const Homepage: React.FC = () => {
             <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontFamily: "'Outfit', sans-serif", fontWeight: 800, color: '#1e1b4b', letterSpacing: '-0.03em', marginBottom: 16 }}>
               What our users say
             </h2>
+            <p style={{ fontSize: 17, color: 'rgba(109,40,217,0.6)', maxWidth: 440, margin: '0 auto' }}>
+              Join thousands of teams that have transformed the way they work.
+            </p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
@@ -764,8 +999,9 @@ const Homepage: React.FC = () => {
         </div>
       </section>
 
+
       {/* ── CTA BANNER ── */}
-      <section style={{ padding: '80px 24px', background: '#faf8ff' }}>
+      <section style={{ padding: '80px 24px', background: 'linear-gradient(135deg, #f0ecff 0%, #ede9fe 100%)' }}>
         <div
           style={{
             maxWidth: 800, margin: '0 auto', textAlign: 'center',
@@ -780,7 +1016,16 @@ const Homepage: React.FC = () => {
           <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
 
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <Lock size={32} style={{ color: 'rgba(255,255,255,0.7)', marginBottom: 20 }} />
+            <div
+              style={{
+                width: 56, height: 56, borderRadius: 16,
+                background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 20px',
+              }}
+            >
+              <Rocket size={26} style={{ color: 'rgba(255,255,255,0.9)' }} />
+            </div>
             <h2 style={{ fontSize: 'clamp(26px, 4vw, 44px)', fontFamily: "'Outfit', sans-serif", fontWeight: 800, color: 'white', letterSpacing: '-0.03em', marginBottom: 16 }}>
               Ready to transform your workflow?
             </h2>
@@ -807,7 +1052,7 @@ const Homepage: React.FC = () => {
                   (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
                 }}
               >
-                Get Started Free <ArrowRight size={16} />
+                Get Start <ArrowRight size={16} />
               </Link>
               <Link
                 to="/login"
@@ -854,7 +1099,7 @@ const Homepage: React.FC = () => {
 
             {/* Links */}
             {[
-              { title: 'Product', links: ['Features', 'Pricing', 'Changelog', 'Roadmap'] },
+              { title: 'Product', links: ['Features', 'Changelog', 'Roadmap'] },
               { title: 'Company', links: ['About', 'Blog', 'Careers', 'Contact'] },
               { title: 'Legal', links: ['Privacy', 'Terms', 'Security', 'Cookies'] },
             ].map(col => (

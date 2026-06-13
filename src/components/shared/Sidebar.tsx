@@ -21,7 +21,8 @@ import {
   FileText,
   Activity,
   CheckSquare,
-  MessageSquare
+  MessageSquare,
+  AlertCircle
 } from 'lucide-react';
 import TaskFlowLogo from './TaskFlowLogo';
 
@@ -54,6 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const [newWsName, setNewWsName] = useState('');
   const [newWsDesc, setNewWsDesc] = useState('');
   const [newWsLogo, setNewWsLogo] = useState('');
+  const [createError, setCreateError] = useState('');
 
   // Sidebar collapse state (saved in localStorage)
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -70,8 +72,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     e.preventDefault();
     if (!newWsName.trim()) return;
     
+    setCreateError('');
     const { workspace, error } = await createWorkspace(newWsName, newWsDesc, newWsLogo);
-    if (!error && workspace) {
+    if (error) {
+      setCreateError(error.message || 'Failed to create workspace.');
+    } else if (workspace) {
       setIsCreateModalOpen(false);
       setNewWsName('');
       setNewWsDesc('');
@@ -203,10 +208,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
                   <Briefcase size={13} />
                 </div>
               )}
-              {!isCollapsed && (
+                {!isCollapsed && (
                 <div className="truncate animate-in fade-in duration-200">
                   <p className={`text-xs font-bold truncate ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{activeWorkspace?.name || 'No Workspace'}</p>
-                  <p className="text-[9px] font-semibold truncate" style={{ color: theme === 'dark' ? 'rgba(167, 139, 250, 0.7)' : 'rgba(109, 40, 217, 0.6)' }}>Workspace</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[9px] font-semibold truncate" style={{ color: theme === 'dark' ? 'rgba(167, 139, 250, 0.7)' : 'rgba(109, 40, 217, 0.6)' }}>Workspace</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -274,6 +281,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
                 <button
                   onClick={() => {
                     setIsWorkspaceMenuOpen(false);
+                    setCreateError('');
                     setIsCreateModalOpen(true);
                   }}
                   className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors"
@@ -465,6 +473,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
               </div>
               
               <form onSubmit={handleCreateWorkspace} className="space-y-4">
+                {createError && (
+                  <div className="flex flex-col gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4 text-xs font-semibold text-rose-600 dark:text-rose-450">
+                    <div className="flex items-start gap-2.5">
+                      <AlertCircle size={16} className="stroke-[2.5] shrink-0 mt-0.5 text-rose-500" />
+                      <span>{createError}</span>
+                    </div>
+                    {createError.toLowerCase().includes('limit') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCreateModalOpen(false);
+                          navigate('/settings');
+                        }}
+                        className="w-fit flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white rounded-xl px-3 py-1.5 font-bold text-[10px] shadow-sm transition-all"
+                      >
+                        Upgrade Workspace Plan
+                      </button>
+                    )}
+                  </div>
+                )}
                 <div>
                   <label 
                     className="block text-[11px] font-bold uppercase tracking-wider mb-1.5" 
@@ -528,36 +556,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
                   />
                 </div>
 
-                <div>
-                  <label 
-                    className="block text-[11px] font-bold uppercase tracking-wider mb-1.5" 
-                    style={{ color: theme === 'dark' ? 'rgba(167, 139, 250, 0.7)' : 'rgba(109, 40, 217, 0.65)' }}
-                  >
-                    Logo URL
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="https://example.com/logo.png"
-                    value={newWsLogo}
-                    onChange={(e) => setNewWsLogo(e.target.value)}
-                    className="w-full rounded-xl p-3 text-sm focus:outline-none transition-all duration-200"
-                    style={{
-                      background: theme === 'dark' ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.05)',
-                      border: theme === 'dark' ? '1px solid rgba(139, 92, 246, 0.2)' : '1px solid rgba(139, 92, 246, 0.18)',
-                      color: theme === 'dark' ? '#e2e0ff' : '#1e1b4b',
-                    }}
-                    onFocus={e => {
-                      (e.target as HTMLElement).style.borderColor = 'rgba(139, 92, 246, 0.5)';
-                      (e.target as HTMLElement).style.boxShadow = '0 0 0 3px rgba(139, 92, 246, 0.1)';
-                      (e.target as HTMLElement).style.background = theme === 'dark' ? 'rgba(139, 92, 246, 0.12)' : 'rgba(139, 92, 246, 0.07)';
-                    }}
-                    onBlur={e => {
-                      (e.target as HTMLElement).style.borderColor = theme === 'dark' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(139, 92, 246, 0.18)';
-                      (e.target as HTMLElement).style.boxShadow = 'none';
-                      (e.target as HTMLElement).style.background = theme === 'dark' ? 'rgba(139, 92, 246, 0.08)' : 'rgba(139, 92, 246, 0.05)';
-                    }}
-                  />
-                </div>
 
                 <div 
                   className="flex items-center justify-end gap-3 pt-3" 

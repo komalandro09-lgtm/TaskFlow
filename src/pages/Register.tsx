@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFirewall } from '../context/FirewallContext';
-import { User, Mail, Lock, ShieldAlert, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, ShieldAlert, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { TurnstileCaptcha } from '../components/shared/TurnstileCaptcha';
 import TaskFlowLogo from '../components/shared/TaskFlowLogo';
 
@@ -12,8 +12,10 @@ const Register: React.FC = () => {
   const { checkAndIncrementRateLimit, logAuditEvent, sanitizeInput, validatePayload } = useFirewall();
 
   const [fullName, setFullName] = useState('');
+  const [nameError, setNameError] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,9 +32,26 @@ const Register: React.FC = () => {
     }
   }, [inviteEmail]);
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setFullName(val);
+    if (val && !/^[a-zA-Z\s]*$/.test(val)) {
+      setNameError('This field can only contain letters and spaces.');
+    } else {
+      setNameError('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+
+    // Validate full name character restrictions
+    if (!/^[a-zA-Z\s]+$/.test(fullName.trim())) {
+      setErrorMsg('Full Name can only contain letters and spaces.');
+      setNameError('This field can only contain letters and spaces.');
+      return;
+    }
 
     // 1. CAPTCHA Check
     if (!captchaToken) {
@@ -124,17 +143,26 @@ const Register: React.FC = () => {
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Full Name</label>
               <div className="relative mt-2">
-                <User className="absolute left-4 top-3.5 text-slate-500 transition-colors group-focus-within:text-brand-400" size={16} />
+                <User className={`absolute left-4 top-3.5 transition-colors group-focus-within:text-brand-400 ${nameError ? 'text-rose-500' : 'text-slate-500'}`} size={16} />
                 <input
                   id="register-name"
                   type="text"
                   required
                   placeholder="John Doe"
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-800 bg-slate-950/80 py-3.5 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-605 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 focus:outline-none transition-all duration-200"
+                  onChange={handleNameChange}
+                  className={`w-full rounded-2xl border bg-slate-950/80 py-3.5 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-605 focus:ring-2 focus:outline-none transition-all duration-200 ${
+                    nameError 
+                      ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/10' 
+                      : 'border-slate-800 focus:border-brand-500 focus:ring-brand-500/10'
+                  }`}
                 />
               </div>
+              {nameError && (
+                <p className="mt-1.5 text-[11px] font-semibold text-rose-400 animate-in slide-in-from-top-1 duration-200">
+                  {nameError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -160,13 +188,20 @@ const Register: React.FC = () => {
                 <Lock className="absolute left-4 top-3.5 text-slate-500 transition-colors group-focus-within:text-brand-400" size={16} />
                 <input
                   id="register-password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="Min. 8 characters with letter & number"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-800 bg-slate-950/80 py-3.5 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-605 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 focus:outline-none transition-all duration-200"
+                  className="w-full rounded-2xl border border-slate-800 bg-slate-950/80 py-3.5 pl-11 pr-11 text-sm text-slate-200 placeholder-slate-605 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 focus:outline-none transition-all duration-200"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-3.5 text-slate-500 hover:text-slate-300 transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
