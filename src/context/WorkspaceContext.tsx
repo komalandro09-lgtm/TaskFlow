@@ -385,7 +385,11 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       if (wsError) throw wsError;
 
-      const wsList = workspaceData || [];
+      const wsList = (workspaceData || []).map((ws: any) => ({
+        plan: 'Free',
+        subscription_status: 'active',
+        ...ws
+      }));
       setWorkspaces(wsList);
 
       if (wsList.length > 0) {
@@ -620,9 +624,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           name,
           description,
           logo_url: logoUrl || `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60`,
-          owner_id: user.id,
-          plan: 'Free',
-          subscription_status: 'active'
+          owner_id: user.id
         })
         .select()
         .single();
