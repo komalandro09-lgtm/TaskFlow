@@ -336,6 +336,10 @@ CREATE POLICY "Workspace members can view projects" ON projects FOR SELECT USING
 CREATE POLICY "Workspace managers/owners can manage projects" ON projects FOR ALL USING (
   public.has_workspace_role(workspace_id, ARRAY['owner', 'manager']) OR
   public.is_workspace_owner(workspace_id)
+)
+WITH CHECK (
+  public.has_workspace_role(workspace_id, ARRAY['owner', 'manager']) OR
+  public.is_workspace_owner(workspace_id)
 );
 
 -- Tasks Policies

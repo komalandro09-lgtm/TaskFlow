@@ -651,12 +651,17 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       if (!activeWorkspace || !user) throw new Error('No active workspace or user');
 
+      // Sanitize date fields: convert empty strings to null to avoid Supabase DATE type rejection (400 error)
+      const sanitizedData = {
+        ...projectData,
+        start_date: projectData.start_date || null,
+        due_date: projectData.due_date || null,
+        workspace_id: activeWorkspace.id
+      };
+
       const { data, error } = await supabase
         .from('projects')
-        .insert({
-          ...projectData,
-          workspace_id: activeWorkspace.id
-        })
+        .insert(sanitizedData)
         .select()
         .single();
 
