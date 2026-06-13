@@ -479,6 +479,10 @@ CREATE POLICY "Workspace managers/owners can manage teams" ON teams
   FOR ALL USING (
     public.has_workspace_role(workspace_id, ARRAY['owner', 'manager']) OR
     public.is_workspace_owner(workspace_id)
+  )
+  WITH CHECK (
+    public.has_workspace_role(workspace_id, ARRAY['owner', 'manager']) OR
+    public.is_workspace_owner(workspace_id)
   );
 
 -- Team Members Policies
@@ -495,6 +499,15 @@ CREATE POLICY "Workspace members can view team memberships" ON team_members
 
 CREATE POLICY "Workspace managers/owners can manage team memberships" ON team_members
   FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM teams t
+      WHERE t.id = team_members.team_id AND (
+        public.has_workspace_role(t.workspace_id, ARRAY['owner', 'manager']) OR
+        public.is_workspace_owner(t.workspace_id)
+      )
+    )
+  )
+  WITH CHECK (
     EXISTS (
       SELECT 1 FROM teams t
       WHERE t.id = team_members.team_id AND (
