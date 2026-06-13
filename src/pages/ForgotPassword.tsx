@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Briefcase, Mail, ArrowLeft, Send, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Mail, ArrowLeft, Send, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useFirewall } from '../context/FirewallContext';
 import { supabase } from '../supabaseClient';
 import { TurnstileCaptcha } from '../components/shared/TurnstileCaptcha';
+import TaskFlowLogo from '../components/shared/TaskFlowLogo';
 
 const ForgotPassword: React.FC = () => {
   const { checkAndIncrementRateLimit, logAuditEvent, sanitizeInput, validatePayload } = useFirewall();
@@ -78,14 +79,12 @@ const ForgotPassword: React.FC = () => {
 
       <div className="z-10 w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
         {/* Brand Header */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand-600 via-brand-500 to-violet-500 text-white shadow-xl shadow-brand-500/20 ring-1 ring-white/10">
-            <Briefcase size={28} className="stroke-[2.2] animate-pulse" />
-          </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-white bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+        <div className="mb-8 text-center flex flex-col items-center gap-3">
+          <TaskFlowLogo variant="full" iconSize={44} textSize={22} />
+          <h2 className="text-2xl font-extrabold tracking-tight" style={{ color: 'white', fontFamily: "'Outfit', sans-serif", letterSpacing: '-0.02em' }}>
             Reset Password
           </h2>
-          <p className="mt-2 text-sm text-slate-400 font-medium">We'll send you instructions to reset your password.</p>
+          <p className="text-sm font-medium" style={{ color: 'rgba(196, 181, 253, 0.65)' }}>We'll send you instructions to reset your password.</p>
         </div>
 
         {/* Forgot Password Card */}

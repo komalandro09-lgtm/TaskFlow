@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useFirewall } from '../context/FirewallContext';
-import { Briefcase, User, Mail, Lock, ShieldAlert, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, ShieldAlert, ArrowRight } from 'lucide-react';
 import { TurnstileCaptcha } from '../components/shared/TurnstileCaptcha';
+import TaskFlowLogo from '../components/shared/TaskFlowLogo';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -16,6 +17,18 @@ const Register: React.FC = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Invitation token support
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('token') || '';
+  const inviteEmail = searchParams.get('email') || '';
+  const hasInvite = !!inviteToken && !!inviteEmail;
+
+  useEffect(() => {
+    if (inviteEmail) {
+      setEmail(decodeURIComponent(inviteEmail));
+    }
+  }, [inviteEmail]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +75,12 @@ const Register: React.FC = () => {
       // 6. Log Success Signup
       await logAuditEvent('Signup Success', sanitizedEmail);
       setLoading(false);
-      navigate('/');
+      // If invitation token exists, redirect to invite page to accept
+      if (inviteToken) {
+        navigate(`/invite?token=${inviteToken}`);
+      } else {
+        navigate('/');
+      }
     }
   };
 
@@ -78,14 +96,16 @@ const Register: React.FC = () => {
 
       <div className="z-10 w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
         {/* Brand Header */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-brand-600 via-brand-500 to-violet-500 text-white shadow-xl shadow-brand-500/20 ring-1 ring-white/10">
-            <Briefcase size={28} className="stroke-[2.2] animate-pulse" />
-          </div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-white bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+        <div className="mb-8 text-center flex flex-col items-center gap-3">
+          <TaskFlowLogo variant="full" iconSize={44} textSize={22} />
+          <h2 className="text-2xl font-extrabold tracking-tight" style={{ color: 'white', fontFamily: "'Outfit', sans-serif", letterSpacing: '-0.02em' }}>
             Create Account
           </h2>
-          <p className="mt-2 text-sm text-slate-400 font-medium">Join TaskFlow and collaborate with your teammates.</p>
+          <p className="text-sm font-medium" style={{ color: 'rgba(196, 181, 253, 0.65)' }}>
+            {hasInvite
+              ? 'Create your account to accept the workspace invitation.'
+              : 'Join TaskFlow and collaborate with your teammates.'}
+          </p>
         </div>
 
         {/* Register Card */}
@@ -128,7 +148,8 @@ const Register: React.FC = () => {
                   placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-800 bg-slate-950/80 py-3.5 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-605 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 focus:outline-none transition-all duration-200"
+                  readOnly={hasInvite}
+                  className={`w-full rounded-2xl border border-slate-800 bg-slate-950/80 py-3.5 pl-11 pr-4 text-sm text-slate-200 placeholder-slate-605 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 focus:outline-none transition-all duration-200 ${hasInvite ? 'opacity-70 cursor-not-allowed' : ''}`}
                 />
               </div>
             </div>

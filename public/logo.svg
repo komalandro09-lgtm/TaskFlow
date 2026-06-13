@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" fill="none">
+  <defs>
+    <linearGradient id="tfGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- TF Monogram -->
+  <!-- Top bar (T crossbar + F top) -->
+  <rect x="8" y="8" width="56" height="14" rx="5" fill="url(#tfGrad)"/>
+  <!-- Left vertical stem -->
+  <rect x="8" y="8" width="16" height="64" rx="5" fill="url(#tfGrad)"/>
+  <!-- F middle crossbar -->
+  <rect x="32" y="34" width="32" height="13" rx="5" fill="url(#tfGrad)"/>
+
+  <!-- TaskFlow wordmark -->
+  <text
+    x="84"
+    y="54"
+    font-family="'Outfit', 'Inter', Arial, sans-serif"
+    font-size="38"
+    font-weight="800"
+    letter-spacing="-1"
+    fill="url(#textGrad)"
+  >TaskFlow</text>
+</svg>

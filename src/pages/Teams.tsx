@@ -46,14 +46,20 @@ const Teams: React.FC = () => {
 
   if (!activeWorkspace) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 max-w-md mx-auto text-center text-slate-800 dark:text-white">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-500 mb-4 border border-slate-200 dark:border-slate-800">
-          <Users size={24} />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 max-w-md mx-auto text-center animate-in fade-in duration-300">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/10 dark:from-brand-500/20 text-brand-600 dark:text-brand-400 mb-6 border border-brand-500/15 shadow-sm">
+          <Users size={26} />
         </div>
-        <h3 className="text-lg font-bold">Workspace Required</h3>
-        <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+        <h3 className="text-xl font-bold tracking-tight text-slate-850 dark:text-white">Workspace Required</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
           Please select or create a workspace first to manage teams.
         </p>
+        <button
+          onClick={() => navigate('/')}
+          className="mt-6 btn-brand rounded-xl px-5 py-3 text-xs font-bold shadow-md shadow-brand-primary/20"
+        >
+          Go to Dashboard
+        </button>
       </div>
     );
   }
@@ -82,7 +88,7 @@ const Teams: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto transition-colors duration-200">
+    <div className="space-y-6 max-w-7xl mx-auto transition-colors duration-200 page-enter">
       {/* Top Section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -91,7 +97,7 @@ const Teams: React.FC = () => {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/20"
+          className="flex items-center gap-2 rounded-xl btn-brand px-4 py-2.5 text-sm font-bold shadow-lg shadow-brand-primary/20"
         >
           <Plus size={16} />
           <span>Create Team</span>
@@ -100,20 +106,20 @@ const Teams: React.FC = () => {
 
       {/* Teams Grid */}
       {teams.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/10 py-16 text-center shadow-xs">
-          <Users className="mx-auto text-slate-400 dark:text-slate-600 mb-3" size={36} />
+        <div className="rounded-2xl border border-dashed border-violet-200/50 dark:border-violet-800/30 bg-white/10 dark:bg-slate-900/10 py-16 text-center shadow-xs">
+          <Users className="mx-auto text-slate-450 dark:text-slate-655 mb-3" size={36} />
           <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">No Teams Configured</h4>
           <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto mb-4">Introduce team spaces to divide workspace projects, members, and targets.</p>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+            className="rounded-xl glass-input px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 focus:outline-none"
           >
             Create Your First Team
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {teams.map((team) => {
+          {teams.map((team, index) => {
             // Stats calculations
             const membersCount = teamMembers.filter(tm => tm.team_id === team.id).length;
             const teamProjects = projects.filter(p => p.team_id === team.id);
@@ -128,7 +134,8 @@ const Teams: React.FC = () => {
               <div
                 key={team.id}
                 onClick={() => navigate(`/team/${team.id}`)}
-                className="group hover-lift relative flex flex-col justify-between rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/30 p-5 shadow-xs cursor-pointer hover:border-brand-500/40 dark:hover:border-brand-500/30 hover:bg-slate-50/20 dark:hover:bg-slate-900/40 transition-all duration-300"
+                className="group hover-lift relative flex flex-col justify-between rounded-2xl glass-card p-5 shadow-xs cursor-pointer animate-fade-in-up"
+                style={{ animationDelay: `${index * 50}ms` }}
               >
                 {/* Header Icon & Dot details */}
                 <div className="flex items-center justify-between gap-4">
@@ -138,12 +145,12 @@ const Teams: React.FC = () => {
                   >
                     {renderIcon(team.icon, 20)}
                   </div>
-                  <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 group-hover:text-brand-500 transition-all duration-200" />
+                  <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-1 group-hover:text-brand-primary transition-all duration-200" />
                 </div>
 
                 {/* Team Info */}
                 <div className="mt-4">
-                  <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-brand-500 dark:group-hover:text-brand-400 transition-colors">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-brand-primary transition-colors">
                     {team.name}
                   </h3>
                   <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
@@ -152,7 +159,7 @@ const Teams: React.FC = () => {
                 </div>
 
                 {/* Team Stats Summary */}
-                <div className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 dark:border-slate-850 pt-4 text-center">
+                <div className="mt-6 grid grid-cols-3 gap-2 border-t border-violet-100/60 dark:border-slate-800/40 pt-4 text-center">
                   <div>
                     <span className="block text-xs font-extrabold text-slate-800 dark:text-slate-100">{membersCount}</span>
                     <span className="text-[10px] text-slate-400 dark:text-slate-500">Members</span>
@@ -169,7 +176,7 @@ const Teams: React.FC = () => {
 
                 {/* Visual Progress Bar */}
                 <div className="mt-4">
-                  <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800/80 overflow-hidden">
+                  <div className="h-1.5 w-full rounded-full bg-violet-100/50 dark:bg-slate-950/40 overflow-hidden">
                     <div 
                       className="h-full rounded-full transition-all duration-300"
                       style={{ 
@@ -187,16 +194,19 @@ const Teams: React.FC = () => {
 
       {/* Create Team Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-slate-800 dark:text-slate-100">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl border border-violet-200/30 dark:border-violet-805/30 bg-white dark:bg-slate-950 p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-slate-800 dark:text-slate-100 overflow-hidden">
+            {/* Ambient Modal Stripe */}
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-brand-primary to-brand-dark"></div>
+
+            <div className="flex items-center justify-between border-b border-violet-100 dark:border-slate-800 pb-4">
               <div className="flex items-center gap-2">
-                <Users className="text-brand-500" size={20} />
+                <Users className="text-brand-primary" size={20} />
                 <h3 className="text-lg font-bold">Create Workspace Team</h3>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="rounded-lg p-1 text-slate-400 dark:text-slate-500 hover:bg-slate-105 dark:hover:bg-slate-900 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -204,38 +214,38 @@ const Teams: React.FC = () => {
             
             <form onSubmit={handleCreateTeam} className="mt-4 space-y-4">
               {errorMsg && (
-                <div className="flex items-center gap-2 rounded-lg bg-rose-500/5 border border-rose-500/10 p-2.5 text-xs text-rose-500 font-semibold">
+                <div className="flex items-center gap-2 rounded-xl bg-rose-500/5 border border-rose-500/10 p-2.5 text-xs text-rose-500 font-semibold">
                   <Info size={14} />
                   <span>{errorMsg}</span>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Team Name *</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-550 dark:text-slate-400">Team Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Frontend Development"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:border-brand-500 focus:outline-none"
+                  className="mt-1.5 w-full rounded-xl glass-input p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-550 dark:text-slate-400">Description</label>
                 <textarea
                   placeholder="Briefly state this team's roadmap..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:border-brand-500 focus:outline-none resize-none"
+                  className="mt-1.5 w-full rounded-xl glass-input p-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none resize-none"
                 />
               </div>
 
               {/* Color Presets */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Theme Color</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-550 dark:text-slate-400">Theme Color</label>
                 <div className="mt-2 flex flex-wrap gap-2.5">
                   {TEAM_COLORS.map(c => (
                     <button
@@ -251,7 +261,7 @@ const Teams: React.FC = () => {
 
               {/* Icon Presets */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">Team Icon</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-555 dark:text-slate-400">Team Icon</label>
                 <div className="mt-2 grid grid-cols-4 gap-2">
                   {TEAM_ICONS.map(i => (
                     <button
@@ -260,8 +270,8 @@ const Teams: React.FC = () => {
                       onClick={() => setIcon(i.name)}
                       className={`flex flex-col items-center gap-1 p-2 rounded-xl border transition-all text-xs ${
                         icon === i.name 
-                          ? 'border-brand-500 bg-brand-500/5 text-brand-605 dark:text-brand-400 font-bold' 
-                          : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500'
+                          ? 'border-brand-primary bg-brand-primary/5 text-brand-primary font-bold' 
+                          : 'border-violet-100/60 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500'
                       }`}
                     >
                       {renderIcon(i.name, 16)}
@@ -271,17 +281,17 @@ const Teams: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-violet-100 dark:border-slate-805">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="rounded-xl px-4 py-2.5 text-xs font-bold text-slate-505 dark:text-slate-455 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/20"
+                  className="rounded-xl btn-brand px-5 py-2.5 text-xs font-bold shadow-lg shadow-brand-primary/20"
                 >
                   Create Team
                 </button>

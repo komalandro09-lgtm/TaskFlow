@@ -20,6 +20,8 @@ import TeamDetail from './pages/TeamDetail';
 import Tasks from './pages/Tasks';
 import Files from './pages/Files';
 import ActivityLogs from './pages/ActivityLogs';
+import InviteLanding from './pages/InviteLanding';
+import TeamChat from './pages/TeamChat';
 
 // Layout
 import Sidebar from './components/shared/Sidebar';
@@ -31,10 +33,13 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   if (loading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-slate-100">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-500 border-t-transparent"></div>
-          <p className="text-sm font-medium tracking-wide text-slate-400">Loading TaskFlow...</p>
+      <div className="flex h-screen w-screen items-center justify-center" style={{ background: 'linear-gradient(135deg, #0f0720, #1e0f3d, #0f0720)' }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="h-12 w-12 rounded-full" style={{ border: '3px solid rgba(139, 92, 246, 0.2)' }}></div>
+            <div className="absolute inset-0 h-12 w-12 animate-spin rounded-full" style={{ border: '3px solid transparent', borderTopColor: '#8b5cf6' }}></div>
+          </div>
+          <p className="text-sm font-semibold tracking-wide" style={{ color: 'rgba(167, 139, 250, 0.7)', fontFamily: "'Outfit', sans-serif" }}>Loading...</p>
         </div>
       </div>
     );
@@ -68,11 +73,11 @@ const DashboardLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="flex h-screen w-screen overflow-hidden transition-colors duration-200" style={{ background: 'var(--app-bg, #f4f2ff)', color: 'var(--text-primary, #1e1b4b)' }}>
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar onMenuClick={() => setIsSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto bg-slate-100/40 dark:bg-slate-900/30 p-6 md:p-8">
+        <main className="flex-1 overflow-y-auto p-5 md:p-7" style={{ background: 'var(--main-bg, #f0ecff)' }}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
@@ -84,6 +89,7 @@ const DashboardLayout: React.FC = () => {
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/files" element={<Files />} />
             <Route path="/activity" element={<ActivityLogs />} />
+            <Route path="/chat" element={<TeamChat />} />
             
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -106,6 +112,7 @@ const App: React.FC = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/invite" element={<InviteLanding />} />
 
                 {/* Dashboard Workspace */}
                 <Route

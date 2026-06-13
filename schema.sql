@@ -110,6 +110,16 @@ CREATE TABLE IF NOT EXISTS project_messages (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
+-- Workspace Messages Table (Team Chat)
+CREATE TABLE IF NOT EXISTS workspace_messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  workspace_id UUID REFERENCES workspaces(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+
 -- Notifications Table
 CREATE TABLE IF NOT EXISTS notifications (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -179,18 +189,6 @@ BEGIN
     COALESCE(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
     COALESCE(new.raw_user_meta_data->>'avatar_url', 'https://api.dicebear.com/7.x/initials/svg?seed=' || split_part(new.email, '@', 1))
   );
-
-  -- Copy pending invitations to workspace_members if the invitations table exists
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'workspace_invitations') THEN
-    INSERT INTO public.workspace_members (workspace_id, user_id, role, status)
-    SELECT workspace_id, new.id, role, 'pending'
-    FROM public.workspace_invitations
-    WHERE LOWER(email) = LOWER(new.email);
-
-    -- Clear claimed invitations
-    DELETE FROM public.workspace_invitations
-    WHERE LOWER(email) = LOWER(new.email);
-  END IF;
 
   RETURN NEW;
 END;
@@ -388,6 +386,17 @@ CREATE POLICY "Workspace members can insert project messages" ON project_message
   ) AND auth.uid() = user_id
 );
 
+-- Workspace Messages Policies
+ALTER TABLE workspace_messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Workspace members can view workspace messages" ON workspace_messages FOR SELECT USING (
+  public.is_workspace_member(workspace_id) OR
+  public.is_workspace_owner(workspace_id)
+);
+CREATE POLICY "Workspace members can insert workspace messages" ON workspace_messages FOR INSERT WITH CHECK (
+  (public.is_workspace_member(workspace_id) OR public.is_workspace_owner(workspace_id)) AND auth.uid() = user_id
+);
+
+
 -- ==========================================
 -- 4. FIREWALL & AUDIT LOGS POLICIES
 -- ==========================================
@@ -505,8 +514,12 @@ CREATE TABLE IF NOT EXISTS public.workspace_invitations (
   workspace_id UUID REFERENCES public.workspaces(id) ON DELETE CASCADE NOT NULL,
   email TEXT NOT NULL,
   role TEXT DEFAULT 'member' CHECK (role IN ('owner', 'manager', 'member')) NOT NULL,
+  token UUID DEFAULT gen_random_uuid() UNIQUE NOT NULL,
+  status TEXT DEFAULT 'Pending' CHECK (status IN ('Pending', 'Accepted', 'Declined', 'Expired', 'Cancelled')) NOT NULL,
   invited_by UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  accepted_at TIMESTAMP WITH TIME ZONE,
   UNIQUE (workspace_id, email)
 );
 
@@ -523,5 +536,229 @@ CREATE POLICY "Workspace managers/owners can manage invitations" ON public.works
   FOR ALL USING (
     public.has_workspace_role(workspace_id, ARRAY['owner', 'manager']) OR public.is_workspace_owner(workspace_id)
   );
+
+-- Allow public select by token for unauthenticated landing page validation
+CREATE POLICY "Public select by invitation token" ON public.workspace_invitations
+  FOR SELECT USING (true);
+
+-- secure function to query invitation details by token anonymously
+CREATE OR REPLACE FUNCTION public.get_invitation_by_token(invite_token UUID)
+RETURNS TABLE (
+  id UUID,
+  workspace_id UUID,
+  workspace_name TEXT,
+  inviter_name TEXT,
+  email TEXT,
+  role TEXT,
+  status TEXT,
+  expires_at TIMESTAMP WITH TIME ZONE
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    wi.id,
+    wi.workspace_id,
+    w.name AS workspace_name,
+    p.full_name AS inviter_name,
+    wi.email,
+    wi.role,
+    wi.status,
+    wi.expires_at
+  FROM public.workspace_invitations wi
+  JOIN public.workspaces w ON wi.workspace_id = w.id
+  JOIN public.profiles p ON wi.invited_by = p.id
+  WHERE wi.token = invite_token;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- secure function to accept a workspace invitation
+CREATE OR REPLACE FUNCTION public.accept_workspace_invitation(invite_token UUID)
+RETURNS JSONB AS $$
+DECLARE
+  invitation_rec RECORD;
+  profile_rec RECORD;
+BEGIN
+  -- Fetch invitation
+  SELECT * INTO invitation_rec 
+  FROM public.workspace_invitations 
+  WHERE token = invite_token;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('error', 'Invitation not found');
+  END IF;
+
+  -- Verify status
+  IF invitation_rec.status != 'Pending' THEN
+    RETURN jsonb_build_object('error', 'Invitation has already been ' || LOWER(invitation_rec.status));
+  END IF;
+
+  -- Verify expiration
+  IF invitation_rec.expires_at < NOW() THEN
+    UPDATE public.workspace_invitations 
+    SET status = 'Expired' 
+    WHERE id = invitation_rec.id;
+    RETURN jsonb_build_object('error', 'Invitation has expired');
+  END IF;
+
+  -- Verify logged-in caller
+  SELECT * INTO profile_rec 
+  FROM public.profiles 
+  WHERE id = auth.uid();
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('error', 'Not authenticated');
+  END IF;
+
+  -- Validate matching email address
+  IF LOWER(profile_rec.email) != LOWER(invitation_rec.email) THEN
+    RETURN jsonb_build_object('error', 'This invitation was sent to ' || invitation_rec.email || ', but you are logged in as ' || profile_rec.email);
+  END IF;
+
+  -- Add to workspace_members (or update status to active)
+  IF EXISTS (
+    SELECT 1 FROM public.workspace_members 
+    WHERE workspace_id = invitation_rec.workspace_id AND user_id = profile_rec.id
+  ) THEN
+    UPDATE public.workspace_members 
+    SET role = invitation_rec.role, status = 'active'
+    WHERE workspace_id = invitation_rec.workspace_id AND user_id = profile_rec.id;
+  ELSE
+    INSERT INTO public.workspace_members (workspace_id, user_id, role, status)
+    VALUES (invitation_rec.workspace_id, profile_rec.id, invitation_rec.role, 'active');
+  END IF;
+
+  -- Update invitation status
+  UPDATE public.workspace_invitations
+  SET status = 'Accepted', accepted_at = NOW()
+  WHERE id = invitation_rec.id;
+
+  -- Log Activity
+  INSERT INTO public.activity_logs (workspace_id, user_id, action, target_type, target_name)
+  VALUES (invitation_rec.workspace_id, profile_rec.id, 'joined', 'user', profile_rec.full_name);
+
+  -- Create Notification for Workspace Owner
+  INSERT INTO public.notifications (user_id, title, description)
+  SELECT owner_id, 'Invitation Accepted', profile_rec.full_name || ' accepted your invitation to join ' || name
+  FROM public.workspaces
+  WHERE id = invitation_rec.workspace_id;
+
+  RETURN jsonb_build_object('success', true, 'workspace_id', invitation_rec.workspace_id);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- secure function to decline a workspace invitation
+CREATE OR REPLACE FUNCTION public.decline_workspace_invitation(invite_token UUID)
+RETURNS JSONB AS $$
+DECLARE
+  invitation_rec RECORD;
+  profile_rec RECORD;
+BEGIN
+  -- Fetch invitation
+  SELECT * INTO invitation_rec 
+  FROM public.workspace_invitations 
+  WHERE token = invite_token;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('error', 'Invitation not found');
+  END IF;
+
+  -- Verify status
+  IF invitation_rec.status != 'Pending' THEN
+    RETURN jsonb_build_object('error', 'Invitation is already ' || LOWER(invitation_rec.status));
+  END IF;
+
+  -- Verify logged-in caller
+  SELECT * INTO profile_rec 
+  FROM public.profiles 
+  WHERE id = auth.uid();
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('error', 'Not authenticated');
+  END IF;
+
+  -- Validate matching email address
+  IF LOWER(profile_rec.email) != LOWER(invitation_rec.email) THEN
+    RETURN jsonb_build_object('error', 'This invitation was sent to ' || invitation_rec.email || ', but you are logged in as ' || profile_rec.email);
+  END IF;
+
+  -- Update invitation status
+  UPDATE public.workspace_invitations
+  SET status = 'Declined'
+  WHERE id = invitation_rec.id;
+
+  RETURN jsonb_build_object('success', true);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Resend API Email Sender RPC
+CREATE OR REPLACE FUNCTION public.send_invitation_email_via_resend(
+  recipient_email TEXT,
+  workspace_name TEXT,
+  inviter_name TEXT,
+  assigned_role TEXT,
+  invite_token UUID,
+  api_key TEXT
+)
+RETURNS JSONB AS $$
+DECLARE
+  response extensions.http_response;
+  payload JSONB;
+  email_html TEXT;
+  invite_url TEXT;
+BEGIN
+  -- Construct the invite URL
+  invite_url := 'http://localhost:5173/invite?token=' || invite_token::TEXT;
+
+  -- Branded HTML Template
+  email_html := '<div style="font-family: -apple-system, BlinkMacSystemFont, ''Segoe UI'', Roboto, Helvetica, Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; border-radius: 20px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">' ||
+                '  <div style="text-align: center; margin-bottom: 28px;">' ||
+                '    <div style="display: inline-block; padding: 12px; background: linear-gradient(135deg, #4f46e5, #8b5cf6); border-radius: 14px; color: #ffffff; font-weight: bold; font-size: 22px; width: 40px; height: 40px; line-height: 40px; text-shadow: 0 2px 4px rgba(0,0,0,0.15);">TF</div>' ||
+                '    <h2 style="color: #0f172a; margin-top: 16px; margin-bottom: 4px; font-size: 24px; font-weight: 800; tracking-tight: -0.025em;">Join ' || workspace_name || '</h2>' ||
+                '    <p style="color: #64748b; font-size: 14px; margin: 0;">Collaborate with your team on TaskFlow</p>' ||
+                '  </div>' ||
+                '  <div style="font-size: 15px; line-height: 1.6; color: #334155; margin-bottom: 24px;">' ||
+                '    <p>Hello,</p>' ||
+                '    <p><strong>' || inviter_name || '</strong> has invited you to join the <strong>' || workspace_name || '</strong> workspace on TaskFlow as a <strong>' || assigned_role || '</strong>.</p>' ||
+                '    <div style="text-align: center; margin: 36px 0;">' ||
+                '      <a href="' || invite_url || '" style="background: linear-gradient(135deg, #4f46e5, #6366f1); color: #ffffff; padding: 14px 30px; text-decoration: none; font-weight: 700; border-radius: 12px; display: inline-block; font-size: 14px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">Accept Invitation</a>' ||
+                '    </div>' ||
+                '    <p style="font-size: 12px; color: #94a3b8; text-align: center;">This invitation link will expire in 7 days.</p>' ||
+                '  </div>' ||
+                '  <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;" />' ||
+                '  <p style="font-size: 11px; color: #94a3b8; line-height: 1.5; text-align: center; margin: 0;">If you did not expect this invitation, you can safely ignore this email.</p>' ||
+                '</div>';
+
+  -- Construct payload for Resend
+  payload := jsonb_build_object(
+    'from', 'TaskFlow <onboarding@resend.dev>',
+    'to', ARRAY[recipient_email],
+    'subject', 'Invitation to join ' || workspace_name || ' on TaskFlow',
+    'html', email_html
+  );
+
+  -- Execute HTTP Post using http extension
+  SELECT * INTO response FROM extensions.http(
+    (
+      'POST',
+      'https://api.resend.com/emails',
+      ARRAY[
+        extensions.http_header('Authorization', 'Bearer ' || api_key),
+        extensions.http_header('Content-Type', 'application/json')
+      ],
+      'application/json',
+      payload::TEXT
+    )::extensions.http_request
+  );
+
+  RETURN jsonb_build_object(
+    'status', response.status,
+    'content', response.content::JSONB
+  );
+EXCEPTION WHEN OTHERS THEN
+  RETURN jsonb_build_object(
+    'error', SQLERRM
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 

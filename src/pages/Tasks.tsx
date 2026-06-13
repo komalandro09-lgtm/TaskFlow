@@ -428,26 +428,26 @@ const Tasks: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col transition-colors duration-200">
+    <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col page-enter">
       {/* Top Section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-violet-100 dark:border-violet-900/30 pb-5">
         <div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white md:text-3xl">Workspace Tasks Board</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">View and organize all tasks across workspace projects and teams.</p>
+          <h2 className="text-2xl font-extrabold tracking-tight text-slate-955 dark:text-white md:text-3xl animate-fade-in-up delay-50">Workspace Tasks Board</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">View and organize all tasks across workspace projects and teams.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 animate-fade-in-up delay-100">
           {/* Toggle board vs list view */}
-          <div className="flex items-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/30 p-1 shadow-xs shrink-0">
+          <div className="flex items-center rounded-xl p-1 shrink-0 glass-panel bg-white/40 dark:bg-slate-900/30">
             <button
               onClick={() => setViewType('board')}
-              className={`p-1.5 rounded-lg transition-colors ${viewType === 'board' ? 'bg-brand-500/10 text-brand-650 dark:text-brand-400 font-bold' : 'text-slate-400 hover:text-slate-650'}`}
+              className={`p-1.5 rounded-lg transition-colors ${viewType === 'board' ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400 font-bold' : 'text-slate-450 hover:text-slate-700'}`}
               title="Board View"
             >
               <KanbanSquare size={16} />
             </button>
             <button
               onClick={() => setViewType('list')}
-              className={`p-1.5 rounded-lg transition-colors ${viewType === 'list' ? 'bg-brand-500/10 text-brand-650 dark:text-brand-400 font-bold' : 'text-slate-400 hover:text-slate-650'}`}
+              className={`p-1.5 rounded-lg transition-colors ${viewType === 'list' ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400 font-bold' : 'text-slate-450 hover:text-slate-700'}`}
               title="List Table View"
             >
               <List size={16} />
@@ -463,7 +463,7 @@ const Tasks: React.FC = () => {
                 alert("Please create a project first before creating tasks.");
               }
             }}
-            className="flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/20"
+            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white btn-brand"
           >
             <Plus size={16} />
             <span>Create Task</span>
@@ -472,15 +472,15 @@ const Tasks: React.FC = () => {
       </div>
 
       {/* Advanced Filters */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white/40 dark:bg-slate-900/10 p-4 shadow-xs">
+      <div className="flex flex-col gap-3 p-4 glass-panel rounded-2xl animate-fade-in-up delay-150">
         <div className="relative w-full">
-          <Search size={16} className="absolute left-3.5 top-3.5 text-slate-400 dark:text-slate-555" />
+          <Search size={16} className="absolute left-3.5 top-3.5 text-violet-400 dark:text-violet-500" />
           <input
             type="text"
             placeholder="Search board tasks by keywords..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-950/40 py-3 pl-10 pr-4 text-xs focus:border-brand-500/80 focus:bg-white dark:focus:bg-slate-950 focus:outline-none"
+            className="w-full rounded-xl py-3 pl-10 pr-4 text-xs focus:outline-none glass-input"
           />
         </div>
 
@@ -488,7 +488,7 @@ const Tasks: React.FC = () => {
           <select
             value={filterTeam}
             onChange={(e) => setFilterTeam(e.target.value)}
-            className="rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950/40 py-2.5 px-3 text-xs text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
+            className="rounded-xl py-2.5 px-3 text-xs focus:outline-none cursor-pointer glass-input text-slate-700 dark:text-slate-300"
           >
             <option value="all">All Teams</option>
             {teams.map(t => (
@@ -499,7 +499,7 @@ const Tasks: React.FC = () => {
           <select
             value={filterProject}
             onChange={(e) => setFilterProject(e.target.value)}
-            className="rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950/40 py-2.5 px-3 text-xs text-slate-705 dark:text-slate-300 focus:outline-none cursor-pointer"
+            className="rounded-xl py-2.5 px-3 text-xs focus:outline-none cursor-pointer glass-input text-slate-700 dark:text-slate-300"
           >
             <option value="all">All Projects</option>
             {projects.map(p => (
@@ -510,7 +510,7 @@ const Tasks: React.FC = () => {
           <select
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
-            className="rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950/40 py-2.5 px-3 text-xs text-slate-705 dark:text-slate-300 focus:outline-none cursor-pointer"
+            className="rounded-xl py-2.5 px-3 text-xs focus:outline-none cursor-pointer glass-input text-slate-700 dark:text-slate-300"
           >
             <option value="all">All Assignees</option>
             {members.map(m => (
@@ -521,7 +521,7 @@ const Tasks: React.FC = () => {
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
-            className="rounded-xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-950/40 py-2.5 px-3 text-xs text-slate-705 dark:text-slate-300 focus:outline-none cursor-pointer"
+            className="rounded-xl py-2.5 px-3 text-xs focus:outline-none cursor-pointer glass-input text-slate-700 dark:text-slate-300"
           >
             <option value="all">All Priorities</option>
             <option value="low">Low</option>
@@ -545,16 +545,16 @@ const Tasks: React.FC = () => {
                 key={colStatus}
                 onDragOver={(e) => handleDragOver(e, colStatus)}
                 onDrop={(e) => handleDrop(e, colStatus)}
-                className={`flex w-72 flex-col rounded-2xl border bg-white dark:bg-slate-900/10 p-3 transition-colors shadow-xs ${
+                className={`flex w-72 flex-col rounded-2xl border p-3 transition-colors shadow-xs ${
                   draggedOverCol === colStatus 
-                    ? 'border-brand-500 bg-brand-500/[0.02]' 
-                    : 'border-slate-200 dark:border-slate-850'
-                }`}
+                    ? 'border-violet-500 bg-violet-500/10 dark:bg-violet-500/20 shadow-lg shadow-violet-500/5' 
+                    : 'border-violet-100 dark:border-violet-900/30'
+                } glass-panel bg-white/40 dark:bg-slate-900/10`}
               >
                 <div className="mb-4 flex items-center justify-between px-1.5">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200 tracking-wide">{col.name}</span>
-                    <span className="rounded-full bg-slate-200 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-400">
+                    <span className="rounded-full bg-violet-100 dark:bg-violet-900/50 px-2 py-0.5 text-[10px] font-bold text-violet-600 dark:text-violet-400">
                       {col.tasks.length}
                     </span>
                   </div>
@@ -566,7 +566,7 @@ const Tasks: React.FC = () => {
                         setIsNewTaskOpen(true);
                       }
                     }}
-                    className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-850 hover:text-slate-700 dark:hover:text-white"
+                    className="rounded-lg p-1 text-slate-400 hover:bg-violet-100 dark:hover:bg-violet-900/55 hover:text-slate-700 dark:hover:text-white transition-all"
                   >
                     <Plus size={14} />
                   </button>
@@ -588,7 +588,7 @@ const Tasks: React.FC = () => {
                         draggable
                         onDragStart={(e) => handleDragStart(e, task.id)}
                         onClick={() => handleOpenTaskDetails(task)}
-                        className="group hover-lift rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 p-4 shadow-xs hover:border-brand-500/40 dark:hover:border-brand-500/30 hover:bg-white dark:hover:bg-slate-900 transition-all duration-200 cursor-grab active:cursor-grabbing"
+                        className="group hover-lift rounded-xl p-4 glass-card hover:border-violet-500/40 dark:hover:border-violet-500/35 transition-all duration-200 cursor-grab active:cursor-grabbing hover:shadow-lg hover:shadow-violet-500/5"
                       >
                         <div className="flex items-center justify-between gap-2 mb-2">
                           <span className={`rounded px-1.5 py-0.5 text-[8px] font-extrabold uppercase border ${getPriorityBadgeColor(task.priority)}`}>
@@ -602,20 +602,20 @@ const Tasks: React.FC = () => {
                           )}
                         </div>
 
-                        <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-brand-500 dark:group-hover:text-brand-400 transition-colors line-clamp-2">
+                        <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors line-clamp-2">
                           {task.title}
                         </h4>
 
                         {/* Project and Team details */}
-                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[9px] font-semibold">
+                        <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-[9px] font-bold">
                           {proj && (
-                            <span className="rounded bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 text-slate-500 dark:text-slate-400 uppercase max-w-[120px] truncate" title={proj.name}>
+                            <span className="rounded bg-violet-50/50 dark:bg-violet-950/45 border border-violet-100/30 dark:border-violet-900/20 px-1.5 py-0.5 text-slate-550 dark:text-slate-400 uppercase max-w-[120px] truncate" title={proj.name}>
                               {proj.name}
                             </span>
                           )}
                           {team && (
                             <span 
-                              className="rounded px-1.5 py-0.5 uppercase max-w-[120px] truncate"
+                              className="rounded px-1.5 py-0.5 uppercase max-w-[120px] truncate border border-violet-100/10"
                               style={{ backgroundColor: `${team.color}15`, color: team.color }}
                               title={team.name}
                             >
@@ -625,7 +625,7 @@ const Tasks: React.FC = () => {
                         </div>
 
                         {/* Checklist/Comment counters and assignee */}
-                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-850/50 pt-3 text-[10px] text-slate-500 dark:text-slate-450 font-semibold">
+                        <div className="mt-4 flex items-center justify-between border-t border-violet-100/50 dark:border-violet-900/20 pt-3 text-[10px] text-slate-500 dark:text-slate-450 font-semibold">
                           <div className="flex items-center gap-2">
                             {task.checklistCount && task.checklistCount.total > 0 && (
                               <div className="flex items-center gap-0.5" title="Checklist progress">
@@ -652,10 +652,10 @@ const Tasks: React.FC = () => {
                               src={assignee.profile.avatar_url}
                               alt=""
                               title={assignee.profile.full_name}
-                              className="h-5.5 w-5.5 rounded-full object-cover border border-slate-200"
+                              className="h-5.5 w-5.5 rounded-full object-cover border border-violet-200 dark:border-violet-800"
                             />
                           ) : (
-                            <div className="rounded-full bg-slate-200 dark:bg-slate-850 p-0.5 text-slate-400" title="Unassigned">
+                            <div className="rounded-full bg-violet-50 dark:bg-violet-950/40 p-0.5 text-slate-400 border border-violet-100/50 dark:border-violet-900/30" title="Unassigned">
                               <User size={12} />
                             </div>
                           )}
@@ -673,11 +673,11 @@ const Tasks: React.FC = () => {
         </div>
       ) : (
         // List View (Table layout)
-        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/20 overflow-hidden shadow-xs">
+        <div className="overflow-hidden glass-panel rounded-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
+                <tr className="border-b border-violet-100 dark:border-violet-900/30 bg-violet-50/20 dark:bg-violet-950/20 text-slate-700 dark:text-slate-350 uppercase tracking-wider font-bold">
                   <th className="px-5 py-3.5">Task Title</th>
                   <th className="px-5 py-3.5">Project</th>
                   <th className="px-5 py-3.5">Team</th>
@@ -687,7 +687,7 @@ const Tasks: React.FC = () => {
                   <th className="px-5 py-3.5">Assignee</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+              <tbody className="divide-y divide-violet-100/30 dark:divide-violet-900/10">
                 {filteredTasks.map(task => {
                   const assignee = members.find(m => m.user_id === task.assignee_id);
                   const proj = projects.find(p => p.id === task.project_id);
@@ -699,10 +699,10 @@ const Tasks: React.FC = () => {
                     <tr 
                       key={task.id}
                       onClick={() => handleOpenTaskDetails(task)}
-                      className="hover:bg-slate-50/40 dark:hover:bg-slate-900/20 cursor-pointer transition-colors"
+                      className="hover:bg-violet-50/20 dark:hover:bg-violet-900/10 cursor-pointer transition-colors"
                     >
                       <td className="px-5 py-3.5">
-                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs hover:text-brand-500 transition-colors">{task.title}</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs hover:text-violet-600 dark:hover:text-violet-400 transition-colors">{task.title}</span>
                       </td>
                       <td className="px-5 py-3.5">
                         <span className="text-slate-500 dark:text-slate-400 font-semibold">{proj ? proj.name : 'N/A'}</span>
@@ -710,7 +710,7 @@ const Tasks: React.FC = () => {
                       <td className="px-5 py-3.5">
                         {team ? (
                           <span 
-                            className="rounded px-2 py-0.5 text-[10px] font-bold uppercase"
+                            className="rounded px-2 py-0.5 text-[10px] font-bold uppercase border border-violet-100/10"
                             style={{ backgroundColor: `${team.color}15`, color: team.color }}
                           >
                             {team.name}
@@ -731,7 +731,7 @@ const Tasks: React.FC = () => {
                           {task.priority}
                         </button>
                         {activePrioritySelector === task.id && (
-                          <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 z-30 w-32 rounded-xl border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 p-1.5 shadow-2xl animate-dropdown">
+                          <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 z-30 w-32 rounded-xl p-1.5 shadow-2xl animate-dropdown glass-panel bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-violet-100 dark:border-violet-900/30">
                             {['low', 'medium', 'high', 'critical'].map(prio => (
                               <button
                                 key={prio}
@@ -761,7 +761,7 @@ const Tasks: React.FC = () => {
                           {task.status.replace('_', ' ')}
                         </button>
                         {activeStatusSelector === task.id && (
-                          <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 z-30 w-32 rounded-xl border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 p-1.5 shadow-2xl animate-dropdown">
+                          <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 z-30 w-32 rounded-xl p-1.5 shadow-2xl animate-dropdown glass-panel bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-violet-100 dark:border-violet-900/30">
                             {['backlog', 'todo', 'in_progress', 'review', 'completed'].map(st => (
                               <button
                                 key={st}
@@ -780,7 +780,7 @@ const Tasks: React.FC = () => {
                         )}
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className={`font-semibold ${isOverdue ? 'text-rose-505 dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
+                        <span className={`font-semibold ${isOverdue ? 'text-rose-500 dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
                           {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
                         </span>
                       </td>
@@ -788,7 +788,7 @@ const Tasks: React.FC = () => {
                         <div className="flex items-center gap-2">
                           {assignee ? (
                             <>
-                              <img src={assignee.profile.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover border border-slate-200" />
+                              <img src={assignee.profile.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover border border-violet-200 dark:border-violet-800" />
                               <span className="font-semibold text-slate-700 dark:text-slate-300">{assignee.profile.full_name}</span>
                             </>
                           ) : (
@@ -814,13 +814,13 @@ const Tasks: React.FC = () => {
 
       {/* Create Task Modal */}
       {isNewTaskOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-slate-850 dark:text-slate-100">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h3 className="text-base font-bold">Create Workspace Task</h3>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-slate-850 dark:text-slate-100 glass-panel bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-violet-100 dark:border-violet-900/30">
+            <div className="flex items-center justify-between border-b border-violet-100 dark:border-violet-900/30 pb-3">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Create Workspace Task</h3>
               <button
                 onClick={() => setIsNewTaskOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="rounded-lg p-1 text-slate-400 hover:bg-violet-100 dark:hover:bg-violet-900/50 hover:text-slate-700 dark:hover:text-white transition-colors"
               >
                 <X size={18} />
               </button>
@@ -833,7 +833,7 @@ const Tasks: React.FC = () => {
                   required
                   value={taskProjId}
                   onChange={(e) => setTaskProjId(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm focus:border-brand-500 focus:outline-none cursor-pointer"
+                  className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none cursor-pointer glass-input text-slate-700 dark:text-slate-300"
                 >
                   {projects.map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
@@ -849,7 +849,7 @@ const Tasks: React.FC = () => {
                   placeholder="e.g. Build API integration handlers"
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 p-2.5 text-sm text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none"
+                  className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none glass-input text-slate-800 dark:text-slate-200"
                 />
               </div>
 
@@ -860,7 +860,7 @@ const Tasks: React.FC = () => {
                   value={taskDesc}
                   onChange={(e) => setTaskDesc(e.target.value)}
                   rows={2}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 p-2.5 text-sm text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none resize-none"
+                  className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none resize-none glass-input text-slate-850 dark:text-slate-200"
                 />
               </div>
 
@@ -870,7 +870,7 @@ const Tasks: React.FC = () => {
                   <select
                     value={taskTeamId}
                     onChange={(e) => setTaskTeamId(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm focus:border-brand-500 focus:outline-none cursor-pointer"
+                    className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none cursor-pointer glass-input text-slate-700 dark:text-slate-300"
                   >
                     <option value="">No Team</option>
                     {teams.map(t => (
@@ -883,7 +883,7 @@ const Tasks: React.FC = () => {
                   <select
                     value={taskAssignee}
                     onChange={(e) => setTaskAssignee(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm focus:border-brand-500 focus:outline-none cursor-pointer"
+                    className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none cursor-pointer glass-input text-slate-700 dark:text-slate-300"
                   >
                     <option value="">Unassigned</option>
                     {members.map(m => (
@@ -899,7 +899,7 @@ const Tasks: React.FC = () => {
                   <select
                     value={taskPriority}
                     onChange={(e) => setTaskPriority(e.target.value as any)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 p-2.5 text-sm text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none cursor-pointer"
+                    className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none cursor-pointer glass-input text-slate-850 dark:text-slate-200"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -913,7 +913,7 @@ const Tasks: React.FC = () => {
                     type="date"
                     value={taskDueDate}
                     onChange={(e) => setTaskDueDate(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 p-2.5 text-sm text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none [color-scheme:dark]"
+                    className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none glass-input text-slate-850 dark:text-slate-200 [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -925,21 +925,21 @@ const Tasks: React.FC = () => {
                   placeholder="Design, Frontend, Bug"
                   value={taskLabels}
                   onChange={(e) => setTaskLabels(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 p-2.5 text-sm text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none"
+                  className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none glass-input text-slate-850 dark:text-slate-200"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-850">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-violet-100 dark:border-violet-900/30">
                 <button
                   type="button"
                   onClick={() => setIsNewTaskOpen(false)}
-                  className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/20"
+                  className="rounded-xl px-4 py-2.5 text-sm font-bold text-white btn-brand"
                 >
                   Create Task
                 </button>
@@ -951,25 +951,25 @@ const Tasks: React.FC = () => {
 
       {/* Task detail drawer (Linear style side pane) */}
       {selectedTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-950/60 backdrop-blur-xs">
-          <div className="w-full max-w-2xl h-screen bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-850 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-250">
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-950/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-2xl h-screen flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-250 glass-panel bg-white/95 dark:bg-slate-955/95 border-l border-violet-100 dark:border-violet-900/30">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-850 p-5 text-slate-850 dark:text-white bg-slate-50/50 dark:bg-slate-950">
+            <div className="flex items-center justify-between border-b border-violet-100 dark:border-violet-900/30 p-5 text-slate-850 dark:text-white bg-white/50 dark:bg-slate-950/50">
               <div className="flex items-center gap-2">
-                <KanbanSquare className="text-brand-500" size={18} />
-                <span className="text-xs font-semibold text-slate-455">Task Workspace</span>
+                <KanbanSquare className="text-violet-500" size={18} />
+                <span className="text-xs font-semibold text-slate-500">Task Workspace</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleDeleteTask(selectedTask.id)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-rose-500"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-violet-100/50 dark:hover:bg-violet-900/50 hover:text-rose-500 transition-colors"
                   title="Delete Task"
                 >
                   <Trash2 size={16} />
                 </button>
                 <button
                   onClick={() => setSelectedTask(null)}
-                  className="rounded-lg p-1.5 text-slate-450 hover:bg-slate-100 dark:hover:bg-slate-900"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-violet-100/50 dark:hover:bg-violet-900/50 hover:text-slate-800 dark:hover:text-white transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -983,31 +983,31 @@ const Tasks: React.FC = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h3 className="text-base font-extrabold text-slate-800 dark:text-white leading-snug">{selectedTask.title}</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-405 mt-2 leading-relaxed whitespace-pre-line">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed whitespace-pre-line">
                         {selectedTask.description || 'No description provided.'}
                       </p>
                     </div>
                     <button
                       onClick={() => setIsEditingTask(true)}
-                      className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white font-semibold rounded-lg bg-slate-50 dark:bg-slate-900 px-3 py-1.5 border border-slate-200 dark:border-slate-800 shrink-0 shadow-xs"
+                      className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-850 dark:hover:text-white font-bold rounded-lg bg-violet-50/50 dark:bg-violet-955/50 hover:bg-violet-100/80 dark:hover:bg-violet-900/50 px-3 py-1.5 border border-violet-100 dark:border-violet-900/30 shrink-0 shadow-xs transition-all"
                     >
                       <Edit size={12} />
                       <span>Edit</span>
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 rounded-xl bg-slate-50 dark:bg-slate-900/20 p-4 border border-slate-200/50 dark:border-slate-850/50">
+                  <div className="grid grid-cols-2 gap-4 rounded-xl p-4 glass-card border border-violet-100/50 dark:border-violet-900/20 bg-white/40 dark:bg-slate-900/10">
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assignee</span>
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Assignee</span>
                       <div className="mt-1.5 flex items-center gap-2">
                         {members.find(m => m.user_id === selectedTask.assignee_id) ? (
                           <>
                             <img
                               src={members.find(m => m.user_id === selectedTask.assignee_id)?.profile.avatar_url}
                               alt=""
-                              className="h-6 w-6 rounded-full object-cover"
+                              className="h-6 w-6 rounded-full object-cover border border-violet-200 dark:border-violet-850"
                             />
-                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-350">
+                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                               {members.find(m => m.user_id === selectedTask.assignee_id)?.profile.full_name}
                             </span>
                           </>
@@ -1018,7 +1018,7 @@ const Tasks: React.FC = () => {
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Priority</span>
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Priority</span>
                       <div className="mt-1.5">
                         <span className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase ${getPriorityBadgeColor(selectedTask.priority)}`}>
                           {selectedTask.priority}
@@ -1028,35 +1028,35 @@ const Tasks: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleUpdateTaskDetails} className="space-y-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/10 p-4 animate-in fade-in duration-200">
+                <form onSubmit={handleUpdateTaskDetails} className="space-y-4 rounded-xl p-4 animate-in fade-in duration-200 glass-card bg-white/40 dark:bg-slate-900/10 border border-violet-100/50 dark:border-violet-900/20">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Task Title *</label>
+                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Task Title *</label>
                     <input
                       type="text"
                       required
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2 text-xs focus:border-brand-500 focus:outline-none"
+                      className="mt-1.5 w-full rounded-xl p-2 text-xs focus:outline-none glass-input text-slate-805 dark:text-slate-200"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Description</label>
+                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description</label>
                     <textarea
                       value={editDesc}
                       onChange={(e) => setEditDesc(e.target.value)}
                       rows={3}
-                      className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-xs text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none resize-none"
+                      className="mt-1.5 w-full rounded-xl p-2 text-xs text-slate-850 dark:text-slate-200 focus:outline-none resize-none glass-input"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Assignee</label>
+                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Assignee</label>
                       <select
                         value={editAssignee}
                         onChange={(e) => setEditAssignee(e.target.value)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2 text-xs focus:border-brand-500 focus:outline-none"
+                        className="mt-1.5 w-full rounded-xl p-2 text-xs focus:outline-none glass-input text-slate-700 dark:text-slate-300"
                       >
                         <option value="">Unassigned</option>
                         {members.map(m => (
@@ -1066,11 +1066,11 @@ const Tasks: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Priority</label>
+                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Priority</label>
                       <select
                         value={editPriority}
                         onChange={(e) => setEditPriority(e.target.value as any)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2 text-xs focus:border-brand-500 focus:outline-none"
+                        className="mt-1.5 w-full rounded-xl p-2 text-xs focus:outline-none glass-input text-slate-707 dark:text-slate-300"
                       >
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -1080,17 +1080,17 @@ const Tasks: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <div className="flex items-center justify-end gap-2 border-t border-violet-100 dark:border-violet-900/30 pt-3">
                     <button
                       type="button"
                       onClick={() => setIsEditingTask(false)}
-                      className="rounded-lg px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700"
+                      className="rounded-lg px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 hover:bg-violet-100 dark:hover:bg-violet-900/40 hover:text-slate-800 dark:hover:text-white transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-500"
+                      className="rounded-lg px-3 py-1.5 text-xs font-bold text-white btn-brand"
                     >
                       Save Updates
                     </button>
@@ -1100,8 +1100,8 @@ const Tasks: React.FC = () => {
 
               {/* Checklist */}
               <div className="space-y-3">
-                <div className="flex items-center gap-1.5 font-bold text-slate-705 dark:text-slate-300 text-xs uppercase tracking-wider">
-                  <CheckSquare size={14} className="text-brand-500" />
+                <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300 text-xs uppercase tracking-wider">
+                  <CheckSquare size={14} className="text-violet-500" />
                   <span>Subtasks Checklist</span>
                 </div>
                 {taskChecklist.length > 0 && (
@@ -1114,19 +1114,19 @@ const Tasks: React.FC = () => {
                 )}
                 <div className="space-y-1.5">
                   {taskChecklist.map(item => (
-                    <div key={item.id} className="flex items-center justify-between rounded-lg bg-slate-50 dark:bg-slate-900/30 p-2.5 border border-slate-200 dark:border-slate-850/50 shadow-xs">
+                    <div key={item.id} className="flex items-center justify-between rounded-lg p-2.5 glass-card border border-violet-100/50 dark:border-violet-900/20 bg-white/40 dark:bg-slate-900/10 shadow-xs">
                       <div className="flex items-center gap-2.5">
                         <input
                           type="checkbox"
                           checked={item.is_completed}
                           onChange={() => handleToggleChecklist(item.id, item.is_completed)}
-                          className="h-4 w-4 rounded border-slate-350 dark:border-slate-705 text-brand-600 bg-slate-50 cursor-pointer focus:ring-0"
+                          className="h-4 w-4 rounded border-violet-300 dark:border-violet-805 text-violet-600 bg-slate-50 cursor-pointer focus:ring-0"
                         />
-                        <span className={`text-xs text-slate-700 dark:text-slate-200 ${item.is_completed ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
+                        <span className={`text-xs text-slate-705 dark:text-slate-200 ${item.is_completed ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
                           {item.title}
                         </span>
                       </div>
-                      <button onClick={() => handleDeleteChecklist(item.id)} className="text-slate-400 hover:text-rose-505">
+                      <button onClick={() => handleDeleteChecklist(item.id)} className="text-slate-400 hover:text-rose-500 transition-colors">
                         <Trash2 size={12} />
                       </button>
                     </div>
@@ -1139,35 +1139,35 @@ const Tasks: React.FC = () => {
                     placeholder="Add subtask specifications..."
                     value={newChecklistTitle}
                     onChange={(e) => setNewChecklistTitle(e.target.value)}
-                    className="flex-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2 text-xs focus:outline-none"
+                    className="flex-1 rounded-xl p-2 text-xs focus:outline-none glass-input text-slate-800 dark:text-slate-200"
                   />
-                  <button type="submit" className="rounded-xl bg-slate-100 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 hover:text-slate-900">Add</button>
+                  <button type="submit" className="rounded-xl px-4 py-2 text-xs font-bold text-white btn-brand">Add</button>
                 </form>
               </div>
 
               {/* Attachments */}
               <div className="space-y-3">
-                <div className="flex items-center gap-1.5 font-bold text-slate-705 dark:text-slate-300 text-xs uppercase tracking-wider">
+                <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-350 text-xs uppercase tracking-wider">
                   <Paperclip size={14} className="text-violet-500" />
                   <span>Task Attachments</span>
                 </div>
                 <div className="space-y-2">
                   {taskAttachments.map(file => (
-                    <div key={file.id} className="flex items-center justify-between rounded-lg bg-slate-50 dark:bg-slate-900/30 p-2 border border-slate-200 dark:border-slate-800/50 shadow-xs">
+                    <div key={file.id} className="flex items-center justify-between rounded-lg p-2 glass-card border border-violet-100/50 dark:border-violet-900/20 bg-white/40 dark:bg-slate-900/10 shadow-xs">
                       <div className="flex items-center gap-2 overflow-hidden">
                         {file.file_type?.startsWith('image/') ? (
                           <img src={file.url} alt="" className="h-8 w-8 rounded object-cover" />
                         ) : (
-                          <div className="flex h-8 w-8 items-center justify-center rounded bg-slate-100 dark:bg-slate-950 border border-slate-200 text-[9px] font-bold text-slate-500">DOC</div>
+                          <div className="flex h-8 w-8 items-center justify-center rounded bg-violet-100 dark:bg-violet-950/80 border border-violet-200 dark:border-violet-800 text-[9px] font-bold text-violet-500">DOC</div>
                         )}
                         <div className="truncate">
-                          <p className="text-xs text-slate-800 dark:text-slate-200 truncate">{file.name}</p>
+                          <p className="text-xs text-slate-805 dark:text-slate-200 truncate">{file.name}</p>
                           <p className="text-[9px] text-slate-450">{(file.size / 1024).toFixed(0)} KB</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5">
                         {file.url !== '#' && (
-                          <a href={file.url} download={file.name} className="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white"><Download size={12} /></a>
+                          <a href={file.url} download={file.name} className="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"><Download size={12} /></a>
                         )}
                         <button 
                           onClick={() => {
@@ -1175,7 +1175,7 @@ const Tasks: React.FC = () => {
                             deleteAttachment(file.id);
                             loadAllTasks();
                           }} 
-                          className="p-1 text-slate-455 hover:text-rose-500"
+                          className="p-1 text-slate-400 hover:text-rose-500 transition-colors"
                         >
                           <Trash2 size={12} />
                         </button>
@@ -1183,9 +1183,9 @@ const Tasks: React.FC = () => {
                     </div>
                   ))}
                 </div>
-                <label className="flex items-center justify-center w-full h-16 rounded-xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:border-brand-500/50 hover:bg-slate-100 dark:hover:bg-slate-950/45 cursor-pointer transition-all shadow-xs">
-                  <div className="flex flex-col items-center gap-1 text-slate-400">
-                    <Upload size={16} />
+                <label className="flex items-center justify-center w-full h-16 rounded-xl border border-dashed border-violet-205 dark:border-violet-850/50 bg-white/30 dark:bg-slate-950/10 hover:border-violet-500/50 hover:bg-violet-50/20 dark:hover:bg-violet-950/30 cursor-pointer transition-all shadow-xs">
+                  <div className="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
+                    <Upload size={16} className="text-violet-500" />
                     <span className="text-[10px] font-bold">Upload computer resources</span>
                   </div>
                   <input type="file" onChange={handleAddFileAttachment} className="hidden" />
@@ -1194,8 +1194,8 @@ const Tasks: React.FC = () => {
 
               {/* Comments */}
               <div className="space-y-4">
-                <div className="flex items-center gap-1.5 font-bold text-slate-705 dark:text-slate-300 text-xs uppercase tracking-wider">
-                  <MessageSquare size={14} className="text-brand-500" />
+                <div className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-350 text-xs uppercase tracking-wider">
+                  <MessageSquare size={14} className="text-violet-500" />
                   <span>Discussion Comments</span>
                 </div>
                 <form onSubmit={handleAddComment} className="flex gap-2">
@@ -1205,25 +1205,25 @@ const Tasks: React.FC = () => {
                     placeholder="Leave a comment reply..."
                     value={newCommentText}
                     onChange={(e) => setNewCommentText(e.target.value)}
-                    className="flex-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2.5 text-xs focus:outline-none"
+                    className="flex-1 rounded-xl p-2.5 text-xs focus:outline-none glass-input text-slate-850 dark:text-slate-200"
                   />
-                  <button type="submit" className="rounded-xl bg-brand-655 px-4 py-2 text-xs font-bold text-white hover:bg-brand-500">Reply</button>
+                  <button type="submit" className="rounded-xl px-4 py-2 text-xs font-bold text-white btn-brand">Reply</button>
                 </form>
 
                 <div className="space-y-3.5">
                   {taskComments.map(comm => (
                     <div key={comm.id} className="flex gap-3 text-xs">
                       {comm.profile?.avatar_url ? (
-                        <img src={comm.profile.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover border border-slate-200" />
+                        <img src={comm.profile.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover border border-violet-200 dark:border-violet-850" />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 font-bold border border-slate-300 text-xs">{(comm.profile?.full_name || 'US').substring(0, 2).toUpperCase()}</div>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 font-bold border border-violet-200 dark:border-violet-800 text-xs">{(comm.profile?.full_name || 'US').substring(0, 2).toUpperCase()}</div>
                       )}
-                      <div className="flex-1 rounded-xl bg-slate-50 dark:bg-slate-905 p-3 border border-slate-200/50 dark:border-slate-850 shadow-xs animate-in fade-in">
+                      <div className="flex-1 rounded-xl p-3 glass-card border border-violet-100/50 dark:border-violet-900/20 bg-white/40 dark:bg-slate-900/10 shadow-xs animate-in fade-in">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-slate-800 dark:text-slate-200">{comm.profile?.full_name}</span>
-                          <span className="text-[9px] text-slate-400">{new Date(comm.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          <span className="text-[9px] text-slate-400 dark:text-slate-500">{new Date(comm.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                        <p className="mt-1 text-slate-605 dark:text-slate-300 leading-relaxed">{renderMentionedText(comm.content)}</p>
+                        <p className="mt-1 text-slate-600 dark:text-slate-300 leading-relaxed">{renderMentionedText(comm.content)}</p>
                       </div>
                     </div>
                   ))}

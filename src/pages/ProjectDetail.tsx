@@ -477,30 +477,30 @@ const ProjectDetail: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col transition-colors duration-200">
+    <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col page-enter">
       {/* Head details */}
       {project && (
-        <div className="flex flex-col gap-4 border-b border-slate-200/60 dark:border-slate-800/70 pb-6 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-4 border-b border-violet-100 dark:border-violet-900/30 pb-6 lg:flex-row lg:items-center lg:justify-between animate-fade-in-up delay-50">
           <div>
-            <div className="flex flex-wrap items-center gap-2 mb-2 animate-in fade-in duration-200">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className={`rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase ${getPriorityColor(project.priority)}`}>
                 {project.priority} priority
               </span>
-              <span className="rounded-full bg-slate-100 dark:bg-slate-850 px-2 py-0.5 text-[9px] font-bold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-transparent uppercase">
+              <span className="rounded-full bg-violet-100/10 dark:bg-violet-900/20 px-2 py-0.5 text-[9px] font-bold text-violet-650 dark:text-violet-400 border border-violet-200/20 dark:border-violet-800/20 uppercase">
                 {project.status}
               </span>
             </div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-800 dark:text-white md:text-3xl">{project.name}</h2>
+            <h2 className="text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white md:text-3xl">{project.name}</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed max-w-xl">{project.description}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
             <div className="flex items-center gap-1.5">
-              <Calendar size={14} />
+              <Calendar size={14} className="text-violet-500" />
               <span>Due: {project.due_date || 'No due date'}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Clock size={14} />
+              <Clock size={14} className="text-violet-500" />
               <span>Start: {project.start_date || 'N/A'}</span>
             </div>
           </div>
@@ -508,13 +508,13 @@ const ProjectDetail: React.FC = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-850 shrink-0">
+      <div className="flex items-center gap-4 border-b border-violet-100 dark:border-violet-900/30 shrink-0 animate-fade-in-up delay-100">
         <button
           onClick={() => setActiveTab('table')}
           className={`flex items-center gap-2 border-b-2 py-3 text-sm font-semibold transition-all ${
             activeTab === 'table' 
-              ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' 
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              ? 'border-violet-500 text-violet-600 dark:text-violet-400 font-bold' 
+              : 'border-transparent text-slate-500 hover:text-slate-805 dark:hover:text-slate-200'
           }`}
         >
           <List size={16} />
@@ -524,8 +524,8 @@ const ProjectDetail: React.FC = () => {
           onClick={() => setActiveTab('kanban')}
           className={`flex items-center gap-2 border-b-2 py-3 text-sm font-semibold transition-all ${
             activeTab === 'kanban' 
-              ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' 
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              ? 'border-violet-500 text-violet-600 dark:text-violet-400 font-bold' 
+              : 'border-transparent text-slate-500 hover:text-slate-805 dark:hover:text-slate-200'
           }`}
         >
           <KanbanSquare size={16} />
@@ -535,13 +535,13 @@ const ProjectDetail: React.FC = () => {
           onClick={() => setActiveTab('activity')}
           className={`flex items-center gap-2 border-b-2 py-3 text-sm font-semibold transition-all ${
             activeTab === 'activity' 
-              ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' 
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              ? 'border-violet-500 text-violet-600 dark:text-violet-400 font-bold' 
+              : 'border-transparent text-slate-500 hover:text-slate-805 dark:hover:text-slate-200'
           }`}
         >
           <Activity size={16} />
           <span>Activity Feed</span>
-          <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[9px] text-slate-500 font-bold">
+          <span className="rounded-full bg-violet-100/10 dark:bg-violet-900/30 px-1.5 py-0.5 text-[9px] text-violet-600 dark:text-violet-400 font-bold border border-violet-200/20">
             {combinedTimeline.length}
           </span>
         </button>
@@ -549,13 +549,13 @@ const ProjectDetail: React.FC = () => {
           onClick={() => setActiveTab('files')}
           className={`flex items-center gap-2 border-b-2 py-3 text-sm font-semibold transition-all ${
             activeTab === 'files' 
-              ? 'border-brand-500 text-brand-600 dark:text-brand-400 font-bold' 
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              ? 'border-violet-500 text-violet-600 dark:text-violet-400 font-bold' 
+              : 'border-transparent text-slate-500 hover:text-slate-805 dark:hover:text-slate-200'
           }`}
         >
           <Files size={16} />
           <span>File Repository</span>
-          <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[9px] text-slate-500 font-bold">
+          <span className="rounded-full bg-violet-100/10 dark:bg-violet-900/30 px-1.5 py-0.5 text-[9px] text-violet-600 dark:text-violet-400 font-bold border border-violet-200/20">
             {projectAttachments.length}
           </span>
         </button>
@@ -564,15 +564,15 @@ const ProjectDetail: React.FC = () => {
       {activeTab === 'table' && (
         <div className="flex-1 flex flex-col space-y-4 overflow-hidden animate-fade-in">
           {/* Filters */}
-          <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/10 p-3 sm:flex-row sm:items-center shadow-xs shrink-0">
+          <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center glass-panel rounded-2xl shrink-0 animate-fade-in-up delay-150">
             <div className="relative flex-1">
-              <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+              <Search size={14} className="absolute left-3 top-2.5 text-violet-450 dark:text-violet-500" />
               <input
                 type="text"
                 placeholder="Search table tasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955/40 py-2.5 pl-9 pr-4 text-xs focus:border-brand-500/80 focus:bg-white focus:outline-none"
+                className="w-full rounded-xl py-2.5 pl-9 pr-4 text-xs focus:outline-none glass-input"
               />
             </div>
             
@@ -580,7 +580,7 @@ const ProjectDetail: React.FC = () => {
               <select
                 value={filterAssignee}
                 onChange={(e) => setFilterAssignee(e.target.value)}
-                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 py-2 px-3 text-xs text-slate-700 dark:text-slate-350 focus:outline-none cursor-pointer"
+                className="rounded-xl py-2 px-3 text-xs focus:outline-none cursor-pointer glass-input"
               >
                 <option value="all">All Assignees</option>
                 {members.map(m => (
@@ -591,7 +591,7 @@ const ProjectDetail: React.FC = () => {
               <select
                 value={filterPriority}
                 onChange={(e) => setFilterPriority(e.target.value)}
-                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-955/40 py-2 px-3 text-xs text-slate-700 dark:text-slate-350 focus:outline-none cursor-pointer"
+                className="rounded-xl py-2 px-3 text-xs focus:outline-none cursor-pointer glass-input"
               >
                 <option value="all">All Priorities</option>
                 <option value="low">Low</option>
@@ -605,7 +605,7 @@ const ProjectDetail: React.FC = () => {
                   setNewTasksCol('todo');
                   setIsNewTaskModalOpen(true);
                 }}
-                className="flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-semibold text-white hover:bg-brand-500 transition-all shadow-md shadow-brand-500/10 active:scale-95 shrink-0"
+                className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white btn-brand shrink-0"
               >
                 <Plus size={14} />
                 <span>Create Task</span>
@@ -614,20 +614,20 @@ const ProjectDetail: React.FC = () => {
           </div>
 
           {/* Main Table view */}
-          <div className="flex-1 overflow-y-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/20 overflow-hidden shadow-xs">
+          <div className="flex-1 overflow-y-auto rounded-2xl overflow-hidden glass-card animate-fade-in-up delay-200">
             <div className="overflow-x-auto h-full">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
-                    <th className="px-5 py-3">Task Title</th>
-                    <th className="px-5 py-3 text-center">Team</th>
-                    <th className="px-5 py-3 text-center">Priority</th>
-                    <th className="px-5 py-3 text-center">Status</th>
-                    <th className="px-5 py-3 text-center">Due Date</th>
-                    <th className="px-5 py-3 text-center">Assignee</th>
+                  <tr className="border-b border-violet-100 dark:border-violet-900/30 bg-violet-500/5 dark:bg-violet-950/20 text-violet-700 dark:text-violet-300 uppercase tracking-wider font-bold">
+                    <th className="px-5 py-3.5">Task Title</th>
+                    <th className="px-5 py-3.5 text-center">Team</th>
+                    <th className="px-5 py-3.5 text-center">Priority</th>
+                    <th className="px-5 py-3.5 text-center">Status</th>
+                    <th className="px-5 py-3.5 text-center">Due Date</th>
+                    <th className="px-5 py-3.5 text-center">Assignee</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
+                <tbody className="divide-y divide-violet-100/40 dark:divide-violet-900/10">
                   {filteredTasks.map(task => {
                     const assignee = members.find(m => m.user_id === task.assignee_id);
                     const taskTeamId = task.team_id || (project && project.team_id);
@@ -638,16 +638,16 @@ const ProjectDetail: React.FC = () => {
                       <tr 
                         key={task.id}
                         onClick={() => handleOpenTaskDetails(task)}
-                        className="hover:bg-slate-50/40 dark:hover:bg-slate-900/20 cursor-pointer transition-colors"
+                        className="hover:bg-violet-50/25 dark:hover:bg-violet-950/15 cursor-pointer transition-all duration-150"
                       >
-                        <td className="px-5 py-3">
-                          <span className="font-bold text-slate-800 dark:text-slate-200 text-xs hover:text-brand-500 transition-colors">{task.title}</span>
+                        <td className="px-5 py-3.5">
+                          <span className="font-bold text-slate-800 dark:text-slate-200 text-xs hover:text-violet-650 dark:hover:text-violet-400 transition-colors">{task.title}</span>
                         </td>
-                        <td className="px-5 py-3 text-center">
+                        <td className="px-5 py-3.5 text-center">
                           {team ? (
                             <span 
-                              className="rounded px-2 py-0.5 text-[10px] font-bold uppercase"
-                              style={{ backgroundColor: `${team.color}15`, color: team.color }}
+                              className="rounded px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border"
+                              style={{ backgroundColor: `${team.color}12`, color: team.color, borderColor: `${team.color}25` }}
                             >
                               {team.name}
                             </span>
@@ -655,7 +655,7 @@ const ProjectDetail: React.FC = () => {
                             <span className="text-slate-400">-</span>
                           )}
                         </td>
-                        <td className="px-5 py-3 relative min-w-[125px]">
+                        <td className="px-5 py-3.5 relative min-w-[125px]">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -667,7 +667,7 @@ const ProjectDetail: React.FC = () => {
                             {task.priority}
                           </button>
                           {activePrioritySelector === task.id && (
-                            <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 z-30 w-32 rounded-xl border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 p-1.5 shadow-2xl animate-dropdown">
+                            <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 z-30 w-32 rounded-xl p-1.5 shadow-2xl animate-dropdown glass-card bg-white/95 dark:bg-slate-900/95">
                               {['low', 'medium', 'high', 'critical'].map(prio => (
                                 <button
                                   key={prio}
@@ -685,7 +685,7 @@ const ProjectDetail: React.FC = () => {
                             </div>
                           )}
                         </td>
-                        <td className="px-5 py-3 relative min-w-[135px]">
+                        <td className="px-5 py-3.5 relative min-w-[135px]">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -697,7 +697,7 @@ const ProjectDetail: React.FC = () => {
                             {task.status.replace('_', ' ')}
                           </button>
                           {activeStatusSelector === task.id && (
-                            <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 z-30 w-32 rounded-xl border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 p-1.5 shadow-2xl animate-dropdown">
+                            <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 z-30 w-32 rounded-xl p-1.5 shadow-2xl animate-dropdown glass-card bg-white/95 dark:bg-slate-900/95">
                               {['backlog', 'todo', 'in_progress', 'review', 'completed'].map(st => (
                                 <button
                                   key={st}
@@ -715,16 +715,16 @@ const ProjectDetail: React.FC = () => {
                             </div>
                           )}
                         </td>
-                        <td className="px-5 py-3 text-center">
-                          <span className={`font-semibold ${isOverdue ? 'text-rose-505 dark:text-rose-400 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
+                        <td className="px-5 py-3.5 text-center">
+                          <span className={`font-semibold ${isOverdue ? 'text-rose-505 dark:text-rose-450 font-bold' : 'text-slate-500 dark:text-slate-400'}`}>
                             {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'No due date'}
                           </span>
                         </td>
-                        <td className="px-5 py-3 text-center">
+                        <td className="px-5 py-3.5 text-center">
                           <div className="flex items-center justify-center gap-2">
                             {assignee ? (
                               <>
-                                <img src={assignee.profile.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover border border-slate-200" />
+                                <img src={assignee.profile.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover border border-violet-100" />
                                 <span className="font-semibold text-slate-700 dark:text-slate-300">{assignee.profile.full_name}</span>
                               </>
                             ) : (
@@ -737,7 +737,7 @@ const ProjectDetail: React.FC = () => {
                   })}
                   {filteredTasks.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="py-16 text-center text-slate-400 dark:text-slate-500">
+                      <td colSpan={6} className="py-16 text-center text-slate-405 dark:text-slate-500">
                         No tasks found matching current filters.
                       </td>
                     </tr>
@@ -750,17 +750,17 @@ const ProjectDetail: React.FC = () => {
       )}
 
       {activeTab === 'kanban' && (
-        <div className="flex-1 flex flex-col space-y-4 overflow-hidden">
+        <div className="flex-1 flex flex-col space-y-4 overflow-hidden animate-fade-in">
           {/* Filters */}
-          <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/10 p-3 sm:flex-row sm:items-center shadow-xs shrink-0">
+          <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center glass-panel rounded-2xl shrink-0 animate-fade-in-up delay-150">
             <div className="relative flex-1">
-              <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+              <Search size={14} className="absolute left-3 top-2.5 text-violet-450 dark:text-violet-500" />
               <input
                 type="text"
                 placeholder="Search board tasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/40 py-2.5 pl-9 pr-4 text-xs focus:border-brand-500/80 focus:bg-white focus:outline-none"
+                className="w-full rounded-xl py-2.5 pl-9 pr-4 text-xs focus:outline-none glass-input"
               />
             </div>
             
@@ -768,7 +768,7 @@ const ProjectDetail: React.FC = () => {
               <select
                 value={filterAssignee}
                 onChange={(e) => setFilterAssignee(e.target.value)}
-                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 py-2 px-3 text-xs text-slate-705 dark:text-slate-300 focus:outline-none cursor-pointer"
+                className="rounded-xl py-2 px-3 text-xs focus:outline-none cursor-pointer glass-input"
               >
                 <option value="all">All Assignees</option>
                 {members.map(m => (
@@ -779,7 +779,7 @@ const ProjectDetail: React.FC = () => {
               <select
                 value={filterPriority}
                 onChange={(e) => setFilterPriority(e.target.value)}
-                className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 py-2 px-3 text-xs text-slate-750 dark:text-slate-300 focus:outline-none cursor-pointer"
+                className="rounded-xl py-2 px-3 text-xs focus:outline-none cursor-pointer glass-input"
               >
                 <option value="all">All Priorities</option>
                 <option value="low">Low</option>
@@ -798,17 +798,17 @@ const ProjectDetail: React.FC = () => {
                   key={colStatus}
                   onDragOver={(e) => handleDragOver(e, colStatus)}
                   onDrop={(e) => handleDrop(e, colStatus)}
-                  className={`flex w-72 flex-col rounded-2xl border bg-white dark:bg-slate-900/10 p-3 transition-colors shadow-xs ${
+                  className={`flex w-72 flex-col rounded-2xl p-3 transition-colors ${
                     draggedOverCol === colStatus 
-                      ? 'border-brand-500 bg-brand-500/[0.02]' 
-                      : 'border-slate-200 dark:border-slate-850'
-                  }`}
+                      ? 'bg-violet-500/10 border border-violet-500/50' 
+                      : ''
+                  } glass-panel`}
                 >
                   {/* Column header */}
                   <div className="mb-4 flex items-center justify-between px-1.5 shrink-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-200 tracking-wide">{col.name}</span>
-                      <span className="rounded-full bg-slate-200 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-400 animate-in zoom-in duration-200">
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 tracking-wide uppercase">{col.name}</span>
+                      <span className="rounded-full bg-violet-100/10 dark:bg-violet-900/30 px-2 py-0.5 text-[10px] font-bold text-violet-600 dark:text-violet-400 border border-violet-200/20">
                         {col.tasks.length}
                       </span>
                     </div>
@@ -817,7 +817,7 @@ const ProjectDetail: React.FC = () => {
                         setNewTasksCol(colStatus as any);
                         setIsNewTaskModalOpen(true);
                       }}
-                      className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-850 hover:text-slate-705 dark:hover:text-white"
+                      className="rounded-lg p-1 text-violet-400 hover:bg-violet-500/10 hover:text-violet-600 transition-colors"
                     >
                       <Plus size={14} />
                     </button>
@@ -825,13 +825,15 @@ const ProjectDetail: React.FC = () => {
 
                   {/* Tasks List */}
                   <div className="space-y-3 min-h-[300px] overflow-y-auto">
-                    {col.tasks.map((task) => {
+                    {col.tasks.map((task, idx) => {
                       const assignee = members.find(m => m.user_id === task.assignee_id);
                       const isOverdue = task.due_date && new Date(task.due_date) < now && task.status !== 'completed';
                       
-                      // Resolve Team
                       const taskTeamId = task.team_id || (project && project.team_id);
                       const team = teams.find(t => t.id === taskTeamId);
+                      const delayClass = idx === 0 ? 'delay-50' :
+                                        idx === 1 ? 'delay-100' :
+                                        idx === 2 ? 'delay-150' : 'delay-200';
 
                       return (
                         <div
@@ -839,7 +841,7 @@ const ProjectDetail: React.FC = () => {
                           draggable
                           onDragStart={(e) => handleDragStart(e, task.id)}
                           onClick={() => handleOpenTaskDetails(task)}
-                          className="group hover-lift rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 p-4 shadow-xs hover:border-brand-500/40 dark:hover:border-brand-500/30 hover:bg-white dark:hover:bg-slate-900 transition-all duration-200 cursor-grab active:cursor-grabbing"
+                          className={`group hover-lift rounded-xl p-4 transition-all duration-200 cursor-grab active:cursor-grabbing glass-card hover:border-violet-500/45 dark:hover:border-violet-500/30 bg-white/60 dark:bg-slate-900/40 animate-fade-in-up ${delayClass}`}
                         >
                           <div className="flex items-center justify-between gap-2 mb-2">
                             <span className={`rounded px-1.5 py-0.5 text-[8px] font-extrabold uppercase border ${getPriorityColor(task.priority)}`}>
@@ -854,7 +856,7 @@ const ProjectDetail: React.FC = () => {
                             )}
                           </div>
 
-                          <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-brand-500 dark:group-hover:text-brand-400 transition-colors line-clamp-2 leading-tight">
+                          <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors line-clamp-2 leading-tight">
                             {task.title}
                           </h4>
 
@@ -862,8 +864,8 @@ const ProjectDetail: React.FC = () => {
                           {team && (
                             <div className="mt-2.5">
                               <span 
-                                className="rounded px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider"
-                                style={{ backgroundColor: `${team.color}15`, color: team.color }}
+                                className="rounded px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider border"
+                                style={{ backgroundColor: `${team.color}12`, color: team.color, borderColor: `${team.color}20` }}
                               >
                                 {team.name}
                               </span>
@@ -871,22 +873,22 @@ const ProjectDetail: React.FC = () => {
                           )}
 
                           {/* Details line */}
-                          <div className="mt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-850/50 pt-3 text-[10px] text-slate-500 dark:text-slate-450 font-semibold">
+                          <div className="mt-4 flex items-center justify-between border-t border-violet-50 dark:border-violet-900/25 pt-3 text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
                             <div className="flex items-center gap-2">
                               {task.checklistCount && task.checklistCount.total > 0 && (
-                                <div className="flex items-center gap-0.5" title="Subtasks">
+                                <div className="flex items-center gap-0.5 text-violet-550 dark:text-violet-400" title="Subtasks">
                                   <CheckSquare size={10} />
                                   <span>{task.checklistCount.completed}/{task.checklistCount.total}</span>
                                 </div>
                               )}
                               {task.commentCount && task.commentCount > 0 ? (
-                                <div className="flex items-center gap-0.5" title="Comments">
+                                <div className="flex items-center gap-0.5 text-violet-550 dark:text-violet-400" title="Comments">
                                   <MessageSquare size={10} />
                                   <span>{task.commentCount}</span>
                                 </div>
                               ) : null}
                               {task.attachmentCount && task.attachmentCount > 0 ? (
-                                <div className="flex items-center gap-0.5" title="Attachments">
+                                <div className="flex items-center gap-0.5 text-violet-550 dark:text-violet-400" title="Attachments">
                                   <Paperclip size={10} />
                                   <span>{task.attachmentCount}</span>
                                 </div>
@@ -899,10 +901,10 @@ const ProjectDetail: React.FC = () => {
                                 src={assignee.profile.avatar_url}
                                 alt=""
                                 title={assignee.profile.full_name}
-                                className="h-5.5 w-5.5 rounded-full object-cover border border-slate-200 dark:border-slate-800"
+                                className="h-5.5 w-5.5 rounded-full object-cover border border-slate-200"
                               />
                             ) : (
-                              <div className="rounded-full bg-slate-200 dark:bg-slate-850 p-0.5 text-slate-400" title="Unassigned">
+                              <div className="rounded-full bg-slate-200 dark:bg-slate-800 p-0.5 text-slate-400" title="Unassigned">
                                 <User size={12} />
                               </div>
                             )}
@@ -911,7 +913,7 @@ const ProjectDetail: React.FC = () => {
                       );
                     })}
                     {col.tasks.length === 0 && (
-                      <div className="py-8 text-center text-slate-500 text-[10px] border border-dashed border-slate-200/50 dark:border-slate-850 rounded-xl">No tasks here</div>
+                      <div className="py-8 text-center text-slate-405 text-[10px] border border-dashed border-violet-200/40 dark:border-violet-900/20 rounded-xl">No tasks here</div>
                     )}
                   </div>
                 </div>
@@ -922,27 +924,27 @@ const ProjectDetail: React.FC = () => {
       )}
 
       {activeTab === 'activity' && (
-        <div className="flex-1 flex flex-col space-y-4 overflow-hidden border border-slate-200 dark:border-slate-850 bg-white/60 dark:bg-slate-900/10 rounded-2xl p-5 shadow-xs h-[550px]">
+        <div className="flex-1 flex flex-col space-y-4 overflow-hidden rounded-2xl p-5 h-[550px] glass-card animate-fade-in">
           <div>
-            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Activity Timeline</h3>
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Activity Timeline</h3>
             <p className="text-xs text-slate-500">Workspace operations related to this project.</p>
           </div>
           
           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
             {combinedTimeline.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center text-slate-500">
-                <Activity size={32} className="text-slate-400 mb-2" />
+                <Activity size={32} className="text-violet-400 mb-2 animate-pulse" />
                 <p className="text-xs font-semibold">No activity logs recorded.</p>
               </div>
             ) : (
               combinedTimeline.map((item: any) => (
                 <div key={item.id} className="flex items-center justify-center py-1">
-                  <div className="flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-1.5 text-[11px] text-slate-655 dark:text-slate-400 font-semibold">
-                    <Clock size={10} className="text-slate-400" />
+                  <div className="flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] text-slate-700 dark:text-slate-350 font-semibold glass-panel bg-white/60 dark:bg-slate-950/40">
+                    <Clock size={10} className="text-violet-400" />
                     <span>
-                      <strong className="text-slate-800 dark:text-slate-200">{item.profile?.full_name || 'System User'}</strong>
+                      <strong className="text-slate-900 dark:text-slate-100">{item.profile?.full_name || 'System User'}</strong>
                       {' '}{item.action}{' '}
-                      <span className="rounded bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 text-[9px] font-mono font-bold">
+                      <span className="rounded bg-violet-100/10 dark:bg-violet-900/30 border border-violet-200/20 px-1.5 py-0.5 text-[9px] font-mono font-bold text-violet-650 dark:text-violet-450">
                         {item.target_type}: {item.target_name}
                       </span>
                     </span>
@@ -958,23 +960,26 @@ const ProjectDetail: React.FC = () => {
       )}
 
       {activeTab === 'files' && (
-        <div className="flex-1 space-y-5">
+        <div className="flex-1 space-y-5 animate-fade-in">
           {projectAttachments.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-250 dark:border-slate-850 py-16 text-center shadow-xs">
-              <Upload className="mx-auto text-slate-405 dark:text-slate-600 mb-2" size={32} />
+            <div className="rounded-3xl glass-card py-16 text-center animate-fade-in-up delay-50">
+              <Upload className="mx-auto text-violet-400 dark:text-violet-600 mb-2 animate-bounce" size={32} />
               <h4 className="text-xs font-bold text-slate-500">No resources uploaded.</h4>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-5">
-              {projectAttachments.map((file: any) => {
+              {projectAttachments.map((file: any, idx) => {
                 const isImage = file.file_type?.startsWith('image/');
                 const sizeKb = Math.round(file.size / 1024) || 0;
+                const delayClass = idx === 0 ? 'delay-50' :
+                                  idx === 1 ? 'delay-100' :
+                                  idx === 2 ? 'delay-150' : 'delay-200';
 
                 return (
-                  <div key={file.id} className="group relative flex flex-col justify-between rounded-xl border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900/20 p-3 hover:border-brand-500/35 transition-colors shadow-xs">
-                    <div className="flex h-28 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-950 overflow-hidden relative border border-slate-200/50 dark:border-slate-900">
+                  <div key={file.id} className={`group relative flex flex-col justify-between rounded-xl p-3 hover:border-violet-500/35 transition-all duration-300 glass-card hover-lift animate-fade-in-up ${delayClass}`}>
+                    <div className="flex h-28 items-center justify-center rounded-lg bg-slate-50/40 dark:bg-slate-950/60 overflow-hidden relative border border-violet-100/50 dark:border-violet-900/30">
                       {isImage && file.url !== '#' ? (
-                        <img src={file.url} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
+                        <img src={file.url} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <div className="text-slate-400 flex flex-col items-center gap-1">
                           <ImageIcon size={24} />
@@ -983,16 +988,16 @@ const ProjectDetail: React.FC = () => {
                       )}
                     </div>
                     <div className="mt-2.5 overflow-hidden">
-                      <p className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">{file.name}</p>
+                      <p className="text-[10px] font-bold text-slate-800 dark:text-slate-300 truncate">{file.name}</p>
                       <p className="text-[8px] text-slate-450 mt-0.5 font-bold uppercase">{sizeKb} KB</p>
                     </div>
 
-                    <div className="absolute right-2.5 top-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute right-2.5 top-2.5 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-[-2px] group-hover:translate-y-0">
                       {file.url !== '#' && (
                         <a
                           href={file.url}
                           download={file.name}
-                          className="flex h-6 w-6 items-center justify-center rounded-lg bg-white dark:bg-slate-900 text-slate-550 border border-slate-200 dark:border-slate-800 shadow-sm"
+                          className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/95 dark:bg-slate-900/95 text-slate-550 border border-violet-100 dark:border-violet-900/45 shadow-sm hover:bg-violet-500 hover:text-white transition-colors"
                         >
                           <Download size={11} />
                         </a>
@@ -1008,13 +1013,13 @@ const ProjectDetail: React.FC = () => {
 
       {/* Create Task Modal */}
       {isNewTaskModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl animate-in zoom-in-95 duration-200 text-slate-850 dark:text-slate-100">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <h3 className="text-base font-bold">Add Task to: {newTasksCol.replace('_', ' ')}</h3>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-fade-in">
+          <div className="w-full max-w-md rounded-3xl p-6 shadow-2xl animate-dropdown text-slate-850 dark:text-slate-100 glass-panel bg-white/95 dark:bg-slate-950/95">
+            <div className="flex items-center justify-between border-b border-violet-100 dark:border-violet-900/30 pb-3">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase tracking-wider">Add Task to: {newTasksCol.replace('_', ' ')}</h3>
               <button
                 onClick={() => setIsNewTaskModalOpen(false)}
-                className="rounded-lg p-1 text-slate-405 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="rounded-lg p-1 text-slate-400 hover:bg-violet-500/10 hover:text-violet-500 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -1022,35 +1027,35 @@ const ProjectDetail: React.FC = () => {
             
             <form onSubmit={handleCreateTask} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Task Title *</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Task Title *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Build API integration handlers"
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm focus:border-brand-500 focus:outline-none"
+                  className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none glass-input"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Description</label>
                 <textarea
                   placeholder="Summarize objectives..."
                   value={taskDesc}
                   onChange={(e) => setTaskDesc(e.target.value)}
                   rows={2}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 p-2.5 text-sm text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none resize-none"
+                  className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none resize-none glass-input"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Assign To Team</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Assign To Team</label>
                   <select
                     value={taskTeamId}
                     onChange={(e) => setTaskTeamId(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm focus:border-brand-500 focus:outline-none cursor-pointer"
+                    className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none cursor-pointer glass-input"
                   >
                     <option value="">No Team</option>
                     {teams.map(t => (
@@ -1059,11 +1064,11 @@ const ProjectDetail: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Assign To Teammate</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Assign To Teammate</label>
                   <select
                     value={taskAssignee}
                     onChange={(e) => setTaskAssignee(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-855 bg-slate-50 dark:bg-slate-950 p-2.5 text-sm focus:border-brand-500 focus:outline-none cursor-pointer"
+                    className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none cursor-pointer glass-input"
                   >
                     <option value="">Unassigned</option>
                     {members.map(m => (
@@ -1075,11 +1080,11 @@ const ProjectDetail: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Priority Level</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Priority Level</label>
                   <select
                     value={taskPriority}
                     onChange={(e) => setTaskPriority(e.target.value as any)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 p-2.5 text-sm text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none cursor-pointer"
+                    className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none cursor-pointer glass-input"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -1088,38 +1093,38 @@ const ProjectDetail: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Due Date</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Due Date</label>
                   <input
                     type="date"
                     value={taskDueDate}
                     onChange={(e) => setTaskDueDate(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 p-2.5 text-sm text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none [color-scheme:dark]"
+                    className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none cursor-pointer glass-input [color-scheme:dark]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Labels (Comma-separated)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Labels (Comma-separated)</label>
                 <input
                   type="text"
                   placeholder="Design, Frontend, Bug"
                   value={taskLabels}
                   onChange={(e) => setTaskLabels(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50 dark:bg-slate-900 p-2.5 text-sm text-slate-850 dark:text-slate-200 focus:border-brand-500 focus:outline-none"
+                  className="mt-1.5 w-full rounded-xl p-2.5 text-sm focus:outline-none glass-input"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-violet-100 dark:border-violet-900/30">
                 <button
                   type="button"
                   onClick={() => setIsNewTaskModalOpen(false)}
-                  className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:bg-violet-500/10 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/20"
+                  className="rounded-xl px-5 py-2.5 text-sm font-bold text-white btn-brand"
                 >
                   Create Task
                 </button>
@@ -1129,29 +1134,29 @@ const ProjectDetail: React.FC = () => {
         </div>
       )}
 
-      {/* Task Details Side Drawer panel (Linear layout) */}
+      {/* Task Details Side Drawer panel */}
       {selectedTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="w-full max-w-4xl h-screen bg-white dark:bg-slate-950 border-l border-slate-200 dark:border-slate-850 flex flex-col justify-between shadow-2xl animate-slide-in-right">
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-955/65 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-4xl h-screen flex flex-col justify-between shadow-2xl animate-slide-in-right glass-panel border-l bg-white/95 dark:bg-slate-950/95">
             
             {/* Drawer Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-850 px-6 py-4 bg-slate-50/50 dark:bg-slate-950 shrink-0 text-slate-800 dark:text-white">
+            <div className="flex items-center justify-between border-b border-violet-100 dark:border-violet-900/30 px-6 py-4 bg-slate-50/20 dark:bg-slate-950/20 shrink-0 text-slate-800 dark:text-white">
               <div className="flex items-center gap-2">
-                <span className="rounded bg-brand-500/10 px-2 py-0.5 text-[9px] font-bold text-brand-600 dark:text-brand-450 border border-brand-500/20">Task details</span>
-                {project && <span className="text-xs text-slate-400 font-bold max-w-[200px] truncate">/ {project.name}</span>}
+                <span className="rounded bg-violet-500/10 px-2 py-0.5 text-[9px] font-bold text-violet-600 dark:text-violet-400 border border-violet-500/20">Task details</span>
+                {project && <span className="text-xs text-slate-500 font-bold max-w-[200px] truncate">/ {project.name}</span>}
               </div>
               
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => handleDeleteTask(selectedTask.id)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-rose-500 transition-colors"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
                   title="Delete Task"
                 >
                   <Trash2 size={15} />
                 </button>
                 <button
                   onClick={handleCloseTaskDetails}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-violet-500/10 transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -1159,41 +1164,50 @@ const ProjectDetail: React.FC = () => {
             </div>
 
             {/* Two-Column Side Drawer Layout */}
-            <div className="flex-1 flex overflow-hidden bg-white dark:bg-slate-950">
+            <div className="flex-1 flex overflow-hidden">
               
               {/* Left Column: Editor, checklists, and discussions */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {!isEditingTask ? (
                   <div className="space-y-3">
-                    <h3 className="text-lg font-bold text-slate-850 dark:text-slate-100 leading-snug">{selectedTask.title}</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed whitespace-pre-line bg-slate-50 dark:bg-slate-900/10 border border-slate-200/50 dark:border-slate-900 rounded-xl p-3.5">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold text-slate-850 dark:text-slate-100 leading-snug">{selectedTask.title}</h3>
+                      <button 
+                        onClick={() => setIsEditingTask(true)}
+                        className="flex items-center gap-1 text-[10px] font-bold text-violet-650 dark:text-violet-400 hover:underline px-2.5 py-1 rounded-lg bg-violet-500/5 hover:bg-violet-500/10 transition-colors"
+                      >
+                        <Edit size={11} />
+                        <span>Edit Task</span>
+                      </button>
+                    </div>
+                    <p className="text-xs text-slate-650 dark:text-slate-350 leading-relaxed whitespace-pre-line rounded-xl p-3.5 glass-card">
                       {selectedTask.description || 'No description provided.'}
                     </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleUpdateTaskDetails} className="space-y-4 bg-slate-50 dark:bg-slate-900/10 border border-slate-200 dark:border-slate-800 rounded-xl p-4 animate-in fade-in">
+                  <form onSubmit={handleUpdateTaskDetails} className="space-y-4 rounded-xl p-4 animate-in fade-in glass-panel bg-white/70 dark:bg-slate-900/30">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Task Title *</label>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Task Title *</label>
                       <input
                         type="text"
                         required
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2.5 text-xs focus:outline-none"
+                        className="mt-1.5 w-full rounded-xl p-2.5 text-xs focus:outline-none glass-input"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Description</label>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Description</label>
                       <textarea
                         value={editDesc}
                         onChange={(e) => setEditDesc(e.target.value)}
                         rows={4}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2.5 text-xs text-slate-850 dark:text-slate-200 focus:outline-none resize-none"
+                        className="mt-1.5 w-full rounded-xl p-2.5 text-xs focus:outline-none resize-none glass-input"
                       />
                     </div>
 
-                    <div className="flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-850 pt-3">
+                    <div className="flex items-center justify-end gap-2 border-t border-violet-100 dark:border-violet-900/30 pt-3">
                       <button
                         type="button"
                         onClick={() => setIsEditingTask(false)}
@@ -1203,7 +1217,7 @@ const ProjectDetail: React.FC = () => {
                       </button>
                       <button
                         type="submit"
-                        className="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-500"
+                        className="rounded-lg px-4 py-1.5 text-xs font-bold text-white btn-brand"
                       >
                         Save updates
                       </button>
@@ -1214,11 +1228,11 @@ const ProjectDetail: React.FC = () => {
                 {/* Subtasks checklist */}
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-1.5 font-bold text-slate-705 dark:text-slate-350 text-xs uppercase tracking-wider">
-                    <CheckSquare size={14} className="text-brand-500" />
+                    <CheckSquare size={14} className="text-violet-500" />
                     <span>Subtasks Checklist</span>
                   </div>
                   {taskChecklist.length > 0 && (
-                    <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                    <div className="h-1.5 w-full rounded-full bg-violet-100 dark:bg-violet-900/30 overflow-hidden">
                       <div 
                         className="h-full rounded-full bg-emerald-500 transition-all duration-300"
                         style={{ width: `${Math.round((taskChecklist.filter(item => item.is_completed).length / taskChecklist.length) * 100)}%` }}
@@ -1227,19 +1241,19 @@ const ProjectDetail: React.FC = () => {
                   )}
                   <div className="space-y-1.5">
                     {taskChecklist.map(item => (
-                      <div key={item.id} className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-900/30 p-2.5 border border-slate-200/50 dark:border-slate-850/50 shadow-xs">
+                      <div key={item.id} className="flex items-center justify-between rounded-xl p-2.5 shadow-xs glass-panel bg-white/50 dark:bg-slate-950/30">
                         <div className="flex items-center gap-2.5">
                           <input
                             type="checkbox"
                             checked={item.is_completed}
                             onChange={() => handleToggleChecklist(item.id, item.is_completed)}
-                            className="h-4 w-4 rounded border-slate-350 dark:border-slate-700 text-brand-600 bg-slate-50 cursor-pointer focus:ring-0"
+                            className="h-4 w-4 rounded border-violet-200 dark:border-violet-800 text-violet-600 bg-slate-50 cursor-pointer focus:ring-0"
                           />
-                          <span className={`text-xs text-slate-700 dark:text-slate-200 ${item.is_completed ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
+                          <span className={`text-xs text-slate-700 dark:text-slate-200 ${item.is_completed ? 'line-through text-slate-400 dark:text-slate-500 font-medium' : 'font-medium'}`}>
                             {item.title}
                           </span>
                         </div>
-                        <button onClick={() => handleDeleteChecklist(item.id)} className="text-slate-400 hover:text-rose-505">
+                        <button onClick={() => handleDeleteChecklist(item.id)} className="text-slate-400 hover:text-rose-500 transition-colors">
                           <Trash2 size={12} />
                         </button>
                       </div>
@@ -1252,26 +1266,26 @@ const ProjectDetail: React.FC = () => {
                       placeholder="Add subtask specifications..."
                       value={newChecklistTitle}
                       onChange={(e) => setNewChecklistTitle(e.target.value)}
-                      className="flex-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-2 text-xs focus:outline-none focus:border-brand-500"
+                      className="flex-1 rounded-xl p-2 text-xs focus:outline-none glass-input"
                     />
-                    <button type="submit" className="rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200 hover:text-slate-900">Add</button>
+                    <button type="submit" className="rounded-xl px-4 py-2 text-xs font-bold text-white btn-brand">Add</button>
                   </form>
                 </div>
 
                 {/* Attachments */}
                 <div className="space-y-3 pt-2">
-                  <div className="flex items-center gap-1.5 font-bold text-slate-705 dark:text-slate-350 text-xs uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5 font-bold text-slate-705 dark:text-slate-355 text-xs uppercase tracking-wider">
                     <Paperclip size={14} className="text-violet-500" />
                     <span>Task Attachments</span>
                   </div>
                   <div className="space-y-2">
                     {taskAttachments.map(file => (
-                      <div key={file.id} className="flex items-center justify-between rounded-lg bg-slate-50 dark:bg-slate-900 p-2 border border-slate-200 dark:border-slate-800/50 shadow-xs">
+                      <div key={file.id} className="flex items-center justify-between rounded-lg p-2 shadow-xs glass-panel bg-white/40 dark:bg-slate-955/20">
                         <div className="flex items-center gap-2 overflow-hidden">
                           {file.file_type?.startsWith('image/') ? (
-                            <img src={file.url} alt="" className="h-8 w-8 rounded object-cover shadow-sm border border-slate-200" />
+                            <img src={file.url} alt="" className="h-8 w-8 rounded object-cover shadow-sm border border-violet-100" />
                           ) : (
-                            <div className="flex h-8 w-8 items-center justify-center rounded bg-slate-100 dark:bg-slate-950 border border-slate-200 text-[9px] font-bold text-slate-500">DOC</div>
+                            <div className="flex h-8 w-8 items-center justify-center rounded bg-violet-150/10 border border-violet-200/20 text-[9px] font-bold text-violet-500">DOC</div>
                           )}
                           <div className="truncate">
                             <p className="text-xs text-slate-800 dark:text-slate-200 truncate">{file.name}</p>
@@ -1280,7 +1294,7 @@ const ProjectDetail: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-1.5">
                           {file.url !== '#' && (
-                            <a href={file.url} download={file.name} className="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white"><Download size={12} /></a>
+                            <a href={file.url} download={file.name} className="p-1 text-slate-405 hover:text-violet-600"><Download size={12} /></a>
                           )}
                           <button 
                             onClick={() => {
@@ -1289,7 +1303,7 @@ const ProjectDetail: React.FC = () => {
                               loadTasks();
                               refreshWorkspaceData();
                             }} 
-                            className="p-1 text-slate-455 hover:text-rose-500"
+                            className="p-1 text-slate-405 hover:text-rose-500"
                           >
                             <Trash2 size={12} />
                           </button>
@@ -1297,7 +1311,7 @@ const ProjectDetail: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                  <label className="flex items-center justify-center w-full h-16 rounded-xl border border-dashed border-slate-350 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:border-brand-500/50 hover:bg-slate-100 dark:hover:bg-slate-950/45 cursor-pointer transition-all shadow-xs">
+                  <label className="flex items-center justify-center w-full h-16 rounded-xl cursor-pointer transition-all shadow-xs glass-card border-dashed border-violet-200 dark:border-violet-900/50 hover:border-violet-500 dark:hover:border-violet-400">
                     <div className="flex flex-col items-center gap-1 text-slate-400">
                       <Upload size={16} />
                       <span className="text-[10px] font-bold">Upload computer resources</span>
@@ -1307,9 +1321,9 @@ const ProjectDetail: React.FC = () => {
                 </div>
 
                 {/* Discussions */}
-                <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-850">
+                <div className="space-y-4 pt-2 border-t border-violet-100 dark:border-violet-900/30">
                   <div className="flex items-center gap-1.5 font-bold text-slate-705 dark:text-slate-300 text-xs uppercase tracking-wider">
-                    <MessageSquare size={14} className="text-brand-500" />
+                    <MessageSquare size={14} className="text-violet-500" />
                     <span>Discussions</span>
                   </div>
                   <form onSubmit={handleAddComment} className="flex gap-2 relative">
@@ -1319,10 +1333,10 @@ const ProjectDetail: React.FC = () => {
                       placeholder="Ask a question or leave a reply..."
                       value={newCommentText}
                       onChange={(e) => handleTextChange(e.target.value, 'comment')}
-                      className="flex-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-2.5 text-xs text-slate-850 dark:text-slate-200 focus:outline-none"
+                      className="flex-1 rounded-xl p-2.5 text-xs focus:outline-none glass-input"
                     />
                     {mentionInputId === 'comment' && mentionSuggestions.length > 0 && (
-                      <div className="absolute bottom-full left-0 z-50 mb-1.5 w-60 rounded-xl border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 p-1.5 shadow-2xl animate-in zoom-in-95 duration-100 text-slate-850 dark:text-slate-250">
+                      <div className="absolute bottom-full left-0 z-50 mb-1.5 w-60 rounded-xl p-1.5 shadow-2xl animate-dropdown glass-card bg-white/95 dark:bg-slate-900/95">
                         <p className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Workspace Teammates</p>
                         <div className="max-h-36 overflow-y-auto">
                           {mentionSuggestions.map(member => (
@@ -1330,11 +1344,11 @@ const ProjectDetail: React.FC = () => {
                               key={member.id}
                               type="button"
                               onClick={() => handleSelectMention(member.profile.full_name)}
-                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs hover:bg-violet-500/10 transition-colors"
                             >
                               <img src={member.profile.avatar_url} alt="" className="h-5 w-5 rounded-full object-cover" />
                               <div className="truncate">
-                                <p className="font-bold leading-none">{member.profile.full_name}</p>
+                                <p className="font-bold leading-none text-slate-800 dark:text-slate-200">{member.profile.full_name}</p>
                                 <p className="text-[8px] text-slate-400 mt-1 leading-none">{member.profile.email}</p>
                               </div>
                             </button>
@@ -1342,23 +1356,23 @@ const ProjectDetail: React.FC = () => {
                         </div>
                       </div>
                     )}
-                    <button type="submit" className="rounded-xl bg-brand-655 px-4 py-2 text-xs font-bold text-white hover:bg-brand-500 shadow-sm">Reply</button>
+                    <button type="submit" className="rounded-xl px-4 py-2 text-xs font-bold text-white btn-brand">Reply</button>
                   </form>
 
                   <div className="space-y-3.5">
                     {taskComments.map(comm => (
-                      <div key={comm.id} className="flex gap-3 text-xs">
+                      <div key={comm.id} className="flex gap-3 text-xs animate-fade-in">
                         {comm.profile?.avatar_url ? (
-                          <img src={comm.profile.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover border border-slate-200 shrink-0" />
+                          <img src={comm.profile.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover border border-violet-100 shrink-0 shadow-sm" />
                         ) : (
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 font-bold border border-slate-300 text-xs shrink-0">{(comm.profile?.full_name || 'US').substring(0, 2).toUpperCase()}</div>
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-500/10 text-violet-650 font-bold border border-violet-250/20 text-xs shrink-0 shadow-sm">{(comm.profile?.full_name || 'US').substring(0, 2).toUpperCase()}</div>
                         )}
-                        <div className="flex-1 rounded-xl bg-slate-50 dark:bg-slate-905 p-3 border border-slate-200/50 dark:border-slate-850 shadow-xs">
+                        <div className="flex-1 rounded-xl p-3 shadow-xs glass-card bg-white/60 dark:bg-slate-900/40">
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-slate-800 dark:text-slate-200">{comm.profile?.full_name}</span>
+                            <span className="font-bold text-slate-850 dark:text-slate-200">{comm.profile?.full_name}</span>
                             <span className="text-[9px] text-slate-400">{new Date(comm.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           </div>
-                          <p className="mt-1 text-slate-605 dark:text-slate-305 leading-relaxed">{renderMentionedText(comm.content)}</p>
+                          <p className="mt-1 text-slate-655 dark:text-slate-350 leading-relaxed font-medium">{renderMentionedText(comm.content)}</p>
                         </div>
                       </div>
                     ))}
@@ -1367,18 +1381,18 @@ const ProjectDetail: React.FC = () => {
               </div>
 
               {/* Right Column: Metadata details panel sidebar */}
-              <div className="w-72 border-l border-slate-200 dark:border-slate-800 p-6 space-y-5 bg-slate-50/50 dark:bg-slate-950/20 shrink-0 overflow-y-auto">
+              <div className="w-72 border-l border-violet-100/50 dark:border-violet-900/30 p-6 space-y-5 bg-slate-50/20 dark:bg-slate-950/20 shrink-0 overflow-y-auto">
                 {!isEditingTask ? (
                   <div className="space-y-4">
                     <div>
                       <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Assigned Teammate</span>
-                      <div className="mt-1.5 flex items-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5">
+                      <div className="mt-1.5 flex items-center gap-2 rounded-xl p-2.5 glass-card bg-white/70 dark:bg-slate-900/60">
                         {members.find(m => m.user_id === selectedTask.assignee_id) ? (
                           <>
                             <img
                               src={members.find(m => m.user_id === selectedTask.assignee_id)?.profile.avatar_url}
                               alt=""
-                              className="h-7 w-7 rounded-full object-cover border border-slate-200"
+                              className="h-7 w-7 rounded-full object-cover border border-violet-100"
                             />
                             <div className="overflow-hidden">
                               <span className="block text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{members.find(m => m.user_id === selectedTask.assignee_id)?.profile.full_name}</span>
@@ -1393,14 +1407,14 @@ const ProjectDetail: React.FC = () => {
 
                     <div>
                       <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Workspace Team</span>
-                      <div className="mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5">
+                      <div className="mt-1.5 rounded-xl p-2.5 glass-card bg-white/70 dark:bg-slate-900/60">
                         {teams.find(t => t.id === ((selectedTask as any).team_id || (project && project.team_id))) ? (
                           <div className="flex items-center gap-2">
                             <div 
                               className="h-2 w-2 rounded-full" 
                               style={{ backgroundColor: teams.find(t => t.id === ((selectedTask as any).team_id || (project && project.team_id)))?.color }}
                             />
-                            <span className="text-xs font-bold text-slate-705 dark:text-slate-200 truncate">
+                            <span className="text-xs font-bold text-slate-750 dark:text-slate-200 truncate">
                               {teams.find(t => t.id === ((selectedTask as any).team_id || (project && project.team_id)))?.name}
                             </span>
                           </div>
@@ -1411,7 +1425,7 @@ const ProjectDetail: React.FC = () => {
                     </div>
 
                     <div>
-                      <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-455">Priority Level</span>
+                      <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Priority Level</span>
                       <div className="mt-1.5">
                         <span className={`rounded-full border px-2.5 py-1 text-[9px] font-extrabold uppercase ${getPriorityColor(selectedTask.priority)}`}>
                           {selectedTask.priority}
@@ -1420,9 +1434,9 @@ const ProjectDetail: React.FC = () => {
                     </div>
 
                     <div>
-                      <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-455">Due Date</span>
-                      <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-655 dark:text-slate-300 font-semibold">
-                        <Calendar size={13} className="text-slate-400" />
+                      <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Due Date</span>
+                      <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-650 dark:text-slate-350 font-semibold">
+                        <Calendar size={13} className="text-violet-500" />
                         <span className={(selectedTask.due_date && new Date(selectedTask.due_date) < now && selectedTask.status !== 'completed') ? 'text-rose-500 font-bold' : ''}>
                           {selectedTask.due_date ? new Date(selectedTask.due_date).toLocaleDateString() : 'No due date'}
                         </span>
@@ -1431,9 +1445,9 @@ const ProjectDetail: React.FC = () => {
 
                     {project && (
                       <div>
-                        <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-455">Connected Project</span>
-                        <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-655 dark:text-slate-300 font-semibold">
-                          <FolderKanban size={13} className="text-brand-500 shrink-0" />
+                        <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Connected Project</span>
+                        <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-655 dark:text-slate-300 font-semibold font-sans">
+                          <FolderKanban size={13} className="text-violet-500 shrink-0" />
                           <span className="truncate">{project.name}</span>
                         </div>
                       </div>
@@ -1446,7 +1460,7 @@ const ProjectDetail: React.FC = () => {
                       <select
                         value={editAssignee}
                         onChange={(e) => setEditAssignee(e.target.value)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-xs focus:outline-none"
+                        className="mt-1.5 w-full rounded-xl p-2 text-xs focus:outline-none glass-input"
                       >
                         <option value="">Unassigned</option>
                         {members.map(m => (
@@ -1460,7 +1474,7 @@ const ProjectDetail: React.FC = () => {
                       <select
                         value={editTeamId}
                         onChange={(e) => setEditTeamId(e.target.value)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-xs focus:outline-none"
+                        className="mt-1.5 w-full rounded-xl p-2 text-xs focus:outline-none glass-input"
                       >
                         <option value="">No Team</option>
                         {teams.map(t => (
@@ -1474,7 +1488,7 @@ const ProjectDetail: React.FC = () => {
                       <select
                         value={editPriority}
                         onChange={(e) => setEditPriority(e.target.value as any)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-xs focus:outline-none"
+                        className="mt-1.5 w-full rounded-xl p-2 text-xs focus:outline-none glass-input"
                       >
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -1489,15 +1503,13 @@ const ProjectDetail: React.FC = () => {
                         type="date"
                         value={editDueDate}
                         onChange={(e) => setEditDueDate(e.target.value)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-xs focus:outline-none [color-scheme:dark]"
+                        className="mt-1.5 w-full rounded-xl p-2 text-xs focus:outline-none glass-input [color-scheme:dark]"
                       />
                     </div>
                   </div>
                 )}
               </div>
-
             </div>
-
           </div>
         </div>
       )}

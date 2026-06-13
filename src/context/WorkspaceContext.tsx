@@ -26,6 +26,23 @@ export interface WorkspaceMember {
   };
 }
 
+export interface WorkspaceInvitation {
+  id: string;
+  workspace_id: string;
+  email: string;
+  role: 'owner' | 'manager' | 'member';
+  token: string;
+  status: 'Pending' | 'Accepted' | 'Declined' | 'Expired' | 'Cancelled';
+  invited_by: string;
+  created_at: string;
+  expires_at: string;
+  accepted_at: string | null;
+  profile?: {
+    full_name: string;
+    avatar_url: string;
+  };
+}
+
 export interface Team {
   id: string;
   workspace_id: string;
@@ -153,6 +170,7 @@ interface WorkspaceContextType {
   activeWorkspace: Workspace | null;
   projects: Project[];
   members: WorkspaceMember[];
+  invitations: WorkspaceInvitation[];
   teams: Team[];
   teamMembers: TeamMember[];
   notifications: Notification[];
@@ -160,15 +178,21 @@ interface WorkspaceContextType {
   loading: boolean;
   createWorkspace: (name: string, description: string, logoUrl: string) => Promise<{ workspace: Workspace | null; error: any }>;
   updateWorkspace: (workspaceId: string, updates: Partial<Workspace>) => Promise<{ workspace: Workspace | null; error: any }>;
+  deleteWorkspace: (workspaceId: string) => Promise<{ error: any }>;
   switchWorkspace: (workspaceId: string) => Promise<void>;
   createProject: (projectData: Omit<Project, 'id' | 'workspace_id' | 'created_at'>) => Promise<{ project: Project | null; error: any }>;
   updateProject: (projectId: string, updates: Partial<Project>) => Promise<{ project: Project | null; error: any }>;
   deleteProject: (projectId: string) => Promise<{ error: any }>;
-  inviteMember: (email: string, role: 'manager' | 'member') => Promise<{ member: WorkspaceMember | null; error: any }>;
+  inviteMember: (email: string, role: 'manager' | 'member') => Promise<{ member: any | null; error: any }>;
   removeMember: (memberId: string) => Promise<{ error: any }>;
   changeMemberRole: (memberId: string, role: 'manager' | 'member') => Promise<{ error: any }>;
   acceptInvitation: (memberId: string) => Promise<{ error: any }>;
   declineInvitation: (memberId: string) => Promise<{ error: any }>;
+  resendInvitation: (invitationId: string) => Promise<{ error: any }>;
+  cancelInvitation: (invitationId: string) => Promise<{ error: any }>;
+  acceptInviteByToken: (token: string) => Promise<{ workspace_id?: string; error: any }>;
+  declineInviteByToken: (token: string) => Promise<{ error: any }>;
+  getInviteByToken: (token: string) => Promise<{ invitation: any; error: any }>;
   createTeam: (name: string, description: string, color: string, icon: string) => Promise<{ team: Team | null; error: any }>;
   updateTeam: (teamId: string, updates: Partial<Team>) => Promise<{ team: Team | null; error: any }>;
   deleteTeam: (teamId: string) => Promise<{ error: any }>;
@@ -189,6 +213,8 @@ interface WorkspaceContextType {
   deleteAttachment: (attachmentId: string) => Promise<{ error: any }>;
   getProjectMessages: (projectId: string) => Promise<{ messages: ProjectMessage[]; error: any }>;
   sendProjectMessage: (projectId: string, content: string) => Promise<{ message: ProjectMessage | null; error: any }>;
+  getWorkspaceMessages: (workspaceId: string) => Promise<{ messages: any[]; error: any }>;
+  sendWorkspaceMessage: (workspaceId: string, content: string) => Promise<{ message: any; error: any }>;
   markNotificationRead: (notificationId: string) => Promise<void>;
   markAllNotificationsRead: () => Promise<void>;
   logActivity: (action: string, targetType: string, targetName: string) => Promise<void>;
@@ -199,12 +225,73 @@ interface WorkspaceContextType {
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
+// Helper: Send invitation email via Resend API directly
+const RESEND_API_KEY = 're_Lsr8q3qh_CgYSiaKZ2X4f4oLur2zRGuja';
+
+async function sendInvitationEmail(
+  recipientEmail: string,
+  workspaceName: string,
+  inviterName: string,
+  assignedRole: string,
+  inviteToken: string
+) {
+  const inviteUrl = `${window.location.origin}/invite?token=${inviteToken}`;
+
+  const emailHtml = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 32px; border: 1px solid #e2e8f0; border-radius: 20px; background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+      <div style="text-align: center; margin-bottom: 28px;">
+        <div style="display: inline-block; padding: 12px; background: linear-gradient(135deg, #4f46e5, #8b5cf6); border-radius: 14px; color: #ffffff; font-weight: bold; font-size: 22px; width: 40px; height: 40px; line-height: 40px; text-shadow: 0 2px 4px rgba(0,0,0,0.15);">TF</div>
+        <h2 style="color: #0f172a; margin-top: 16px; margin-bottom: 4px; font-size: 24px; font-weight: 800;">Join ${workspaceName}</h2>
+        <p style="color: #64748b; font-size: 14px; margin: 0;">Collaborate with your team on TaskFlow</p>
+      </div>
+      <div style="font-size: 15px; line-height: 1.6; color: #334155; margin-bottom: 24px;">
+        <p>Hello,</p>
+        <p><strong>${inviterName}</strong> has invited you to join the <strong>${workspaceName}</strong> workspace on TaskFlow as a <strong>${assignedRole}</strong>.</p>
+        <div style="text-align: center; margin: 36px 0;">
+          <a href="${inviteUrl}" style="background: linear-gradient(135deg, #4f46e5, #6366f1); color: #ffffff; padding: 14px 30px; text-decoration: none; font-weight: 700; border-radius: 12px; display: inline-block; font-size: 14px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">Accept Invitation</a>
+        </div>
+        <p style="font-size: 12px; color: #94a3b8; text-align: center;">This invitation link will expire in 7 days.</p>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;" />
+      <p style="font-size: 11px; color: #94a3b8; line-height: 1.5; text-align: center; margin: 0;">If you did not expect this invitation, you can safely ignore this email.</p>
+    </div>
+  `;
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'TaskFlow <onboarding@resend.dev>',
+        to: [recipientEmail],
+        subject: `Invitation to join ${workspaceName} on TaskFlow`,
+        html: emailHtml
+      })
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      console.error('Resend API error:', result);
+      return { error: result };
+    }
+    console.log('Invitation email sent successfully:', result);
+    return { error: null };
+  } catch (err) {
+    console.error('Failed to send invitation email:', err);
+    return { error: err };
+  }
+}
+
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [members, setMembers] = useState<WorkspaceMember[]>([]);
+  const [invitations, setInvitations] = useState<WorkspaceInvitation[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -235,41 +322,46 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
 
     // Set up Realtime Subscription for Notifications
-    const notificationChannel = supabase
-      .channel('public:notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          const newNotif = payload.new as Notification;
-          // Update local state so it appears in the topbar immediately
-          setNotifications((prev) => {
-            // Prevent duplicates if triggerNotification already added it
-            if (prev.some(n => n.id === newNotif.id)) return prev;
-            return [newNotif, ...prev];
-          });
+    let notificationChannel: any = null;
+    if (supabase.channel) {
+      notificationChannel = supabase
+        .channel('public:notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            const newNotif = payload.new as Notification;
+            // Update local state so it appears in the topbar immediately
+            setNotifications((prev) => {
+              // Prevent duplicates if triggerNotification already added it
+              if (prev.some(n => n.id === newNotif.id)) return prev;
+              return [newNotif, ...prev];
+            });
 
-          // Show browser popup
-          if ('Notification' in window && window.Notification.permission === 'granted') {
-            new window.Notification(newNotif.title, { body: newNotif.description });
+            // Show browser popup
+            if ('Notification' in window && window.Notification.permission === 'granted') {
+              new window.Notification(newNotif.title, { body: newNotif.description });
+            }
+
+            // Show in-app visual toast
+            setActiveToast({ id: newNotif.id, title: newNotif.title, desc: newNotif.description });
+            setTimeout(() => {
+              setActiveToast(current => current?.id === newNotif.id ? null : current);
+            }, 5000);
           }
-
-          // Show in-app visual toast
-          setActiveToast({ id: newNotif.id, title: newNotif.title, desc: newNotif.description });
-          setTimeout(() => {
-            setActiveToast(current => current?.id === newNotif.id ? null : current);
-          }, 5000);
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+    }
 
     return () => {
-      supabase.removeChannel(notificationChannel);
+      if (notificationChannel && supabase.removeChannel) {
+        supabase.removeChannel(notificationChannel);
+      }
     };
   }, [user]);
 
@@ -379,35 +471,51 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         return { ...member, profile };
       });
 
-      // Fetch pending workspace invitations for non-registered users (live mode only)
-      let guestMembers: any[] = [];
-      if (!isUsingMock) {
-        try {
-          const { data: inviteData } = await supabase
-            .from('workspace_invitations')
-            .select('*')
-            .eq('workspace_id', workspaceId);
+      // Fetch workspace invitations
+      let inviteList: any[] = [];
+      try {
+        const { data: inviteData } = await supabase
+          .from('workspace_invitations')
+          .select('*')
+          .eq('workspace_id', workspaceId);
 
-          if (inviteData) {
-            guestMembers = inviteData.map((inv: any) => ({
-              id: inv.id,
-              workspace_id: inv.workspace_id,
-              user_id: `invite_${inv.id}`,
-              role: inv.role,
-              status: 'pending',
-              is_guest_invite: true,
+        if (inviteData) {
+          inviteList = inviteData.map((inv: any) => {
+            const inviter = memberList.find(m => m.user_id === inv.invited_by) || { profile: { full_name: 'Workspace Owner' } };
+            return {
+              ...inv,
               profile: {
                 id: `invite_${inv.id}`,
                 email: inv.email,
-                full_name: inv.email.split('@')[0] + ' (Invited Guest)',
-                avatar_url: `https://api.dicebear.com/7.x/initials/svg?seed=${inv.email.split('@')[0]}`
+                full_name: inv.email.split('@')[0] + ' (Guest)',
+                avatar_url: `https://api.dicebear.com/7.x/initials/svg?seed=${inv.email.split('@')[0]}`,
+                inviter_name: inviter.profile?.full_name || 'Workspace Owner'
               }
-            }));
-          }
-        } catch (err) {
-          console.error('Error fetching guest invitations:', err);
+            };
+          });
         }
+      } catch (err) {
+        console.error('Error fetching guest invitations:', err);
       }
+      setInvitations(inviteList);
+
+      // Map pending invitations to guest members for backward compatibility in standard directory listing
+      const guestMembers = inviteList
+        .filter((inv: any) => inv.status === 'Pending')
+        .map((inv: any) => ({
+          id: inv.id,
+          workspace_id: inv.workspace_id,
+          user_id: `invite_${inv.id}`,
+          role: inv.role,
+          status: 'pending',
+          is_guest_invite: true,
+          profile: {
+            id: `invite_${inv.id}`,
+            email: inv.email,
+            full_name: inv.email.split('@')[0] + ' (Invited Guest)',
+            avatar_url: `https://api.dicebear.com/7.x/initials/svg?seed=${inv.email.split('@')[0]}`
+          }
+        }));
 
       setMembers([...memberList, ...guestMembers]);
 
@@ -610,124 +718,403 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const deleteWorkspace = async (workspaceId: string) => {
+    try {
+      const workspace = workspaces.find(w => w.id === workspaceId);
+      const name = workspace ? workspace.name : 'Unknown';
+
+      // If we are using mock database, perform local CASCADE delete
+      if (isUsingMock) {
+        const dbData = localStorage.getItem('taskflow_mock_db');
+        if (dbData) {
+          const db = JSON.parse(dbData);
+          
+          // 1. Delete workspace
+          db.workspaces = (db.workspaces || []).filter((w: any) => w.id !== workspaceId);
+          
+          // 2. Delete workspace members
+          db.workspace_members = (db.workspace_members || []).filter((wm: any) => wm.workspace_id !== workspaceId);
+          
+          // 3. Find projects of this workspace
+          const workspaceProjects = (db.projects || []).filter((p: any) => p.workspace_id === workspaceId);
+          const workspaceProjectIds = workspaceProjects.map((p: any) => p.id);
+          
+          // 4. Delete projects and project members
+          db.projects = (db.projects || []).filter((p: any) => p.workspace_id !== workspaceId);
+          db.project_members = (db.project_members || []).filter((pm: any) => !workspaceProjectIds.includes(pm.project_id));
+          
+          // 5. Delete tasks of this workspace
+          const workspaceTasks = (db.tasks || []).filter((t: any) => workspaceProjectIds.includes(t.project_id));
+          const workspaceTaskIds = workspaceTasks.map((t: any) => t.id);
+          db.tasks = (db.tasks || []).filter((t: any) => !workspaceProjectIds.includes(t.project_id));
+          
+          // 6. Delete checklists, comments, attachments
+          db.checklists = (db.checklists || []).filter((c: any) => !workspaceTaskIds.includes(c.task_id));
+          db.comments = (db.comments || []).filter((cm: any) => !workspaceTaskIds.includes(cm.task_id));
+          db.attachments = (db.attachments || []).filter((att: any) => !workspaceTaskIds.includes(att.task_id));
+          
+          // 7. Find teams of this workspace
+          const workspaceTeams = (db.teams || []).filter((t: any) => t.workspace_id === workspaceId);
+          const workspaceTeamIds = workspaceTeams.map((t: any) => t.id);
+          
+          // 8. Delete teams and team members
+          db.teams = (db.teams || []).filter((t: any) => t.workspace_id !== workspaceId);
+          db.team_members = (db.team_members || []).filter((tm: any) => !workspaceTeamIds.includes(tm.team_id));
+          
+          // 9. Delete activities, notifications, messages
+          db.activity_logs = (db.activity_logs || []).filter((act: any) => act.workspace_id !== workspaceId);
+          db.project_messages = (db.project_messages || []).filter((msg: any) => !workspaceProjectIds.includes(msg.project_id));
+          db.workspace_messages = (db.workspace_messages || []).filter((msg: any) => msg.workspace_id !== workspaceId);
+          db.workspace_invitations = (db.workspace_invitations || []).filter((inv: any) => inv.workspace_id !== workspaceId);
+
+          localStorage.setItem('taskflow_mock_db', JSON.stringify(db));
+        }
+      } else {
+        // Live database CASCADE is handled by Supabase foreign keys
+        const { error } = await supabase
+          .from('workspaces')
+          .delete()
+          .eq('id', workspaceId);
+
+        if (error) throw error;
+      }
+
+      await logActivity('deleted workspace', 'workspace', name);
+
+      // Reload workspaces
+      const { data: workspaceData, error: wsError } = await supabase
+        .from('workspaces')
+        .select('*');
+
+      if (wsError) throw wsError;
+
+      const wsList = workspaceData || [];
+      setWorkspaces(wsList);
+
+      if (wsList.length > 0) {
+        // Fallback to the first available workspace that is not the deleted one
+        const fallback = wsList.find((w: any) => w.id !== workspaceId) || wsList[0];
+        setActiveWorkspace(fallback);
+        localStorage.setItem('taskflow_active_workspace_id', fallback.id);
+        await loadWorkspaceSubData(fallback.id);
+      } else {
+        setActiveWorkspace(null);
+        setProjects([]);
+        setMembers([]);
+        setTeams([]);
+        setTeamMembers([]);
+        localStorage.removeItem('taskflow_active_workspace_id');
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error deleting workspace:', error);
+      return { error };
+    }
+  };
+
   const inviteMember = async (email: string, role: 'manager' | 'member') => {
     try {
       if (!activeWorkspace || !user) throw new Error('No active workspace');
+      const normalizedEmail = email.trim().toLowerCase();
 
-      // Check if user is registered in the profiles table (query Supabase first, fallback to mock)
+      // Check if already invited or member of the workspace
+      const existingInvite = invitations.find(i => i.email.toLowerCase() === normalizedEmail && i.status === 'Pending');
+      if (existingInvite) {
+        throw new Error('This email address has already been invited to this workspace.');
+      }
+
+      // Check if already active member
+      const activeMember = members.find(m => m.profile?.email.toLowerCase() === normalizedEmail && m.status === 'active');
+      if (activeMember) {
+        throw new Error('User is already a member of this workspace');
+      }
+
+      // Check if user has an existing profile
       let profile = null;
       const { data: supabaseProfile } = await supabase
         .from('profiles')
         .select('*')
-        .eq('email', email.toLowerCase())
+        .eq('email', normalizedEmail)
         .maybeSingle();
 
       if (supabaseProfile) {
         profile = supabaseProfile;
       } else if (isUsingMock) {
         const dbState = JSON.parse(localStorage.getItem('taskflow_mock_db') || '{}');
-        profile = (dbState.profiles || []).find((p: any) => p.email.toLowerCase() === email.toLowerCase());
+        profile = (dbState.profiles || []).find((p: any) => p.email.toLowerCase() === normalizedEmail);
       }
 
-      // If profile is not registered and we are in live Supabase mode, store guest invitation
-      if (!profile && !isUsingMock) {
-        const existingInvite = members.find(m => m.profile?.email.toLowerCase() === email.toLowerCase());
-        if (existingInvite) {
-          throw new Error('This email address has already been invited to this workspace.');
-        }
+      const generatedToken = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-        const { data, error } = await supabase
-          .from('workspace_invitations')
-          .insert({
-            workspace_id: activeWorkspace.id,
-            email: email.toLowerCase(),
-            role,
-            invited_by: user.id
-          })
-          .select()
-          .single();
-
-        if (error) {
-          if (error.code === '23505') {
-            throw new Error('This email address has already been invited to this workspace.');
-          }
-          throw error;
-        }
-
-        await logActivity('invited guest', 'member', email);
-        await refreshWorkspaceData();
-
-        const guestProfile = {
-          id: `invite_${data.id}`,
-          email: email.toLowerCase(),
-          full_name: email.split('@')[0] + ' (Guest)',
-          avatar_url: `https://api.dicebear.com/7.x/initials/svg?seed=${email.split('@')[0]}`
-        };
-
-        return {
-          member: {
-            id: data.id,
-            workspace_id: activeWorkspace.id,
-            user_id: `invite_${data.id}`,
-            role,
-            status: 'pending',
-            is_guest_invite: true,
-            profile: guestProfile
-          },
-          error: null
-        };
+      // Create invitation in workspace_invitations table
+      const insertData: any = {
+        workspace_id: activeWorkspace.id,
+        email: normalizedEmail,
+        role,
+        status: 'Pending',
+        invited_by: user.id,
+        expires_at: expiresAt
+      };
+      // For mock mode, pass a generated token. For live mode, let the DB generate it via DEFAULT.
+      if (isUsingMock) {
+        insertData.token = generatedToken;
       }
 
-      let userId = '';
-      let targetProfile = null;
-
-      if (profile) {
-        userId = profile.id;
-        targetProfile = profile;
-      } else {
-        // Simulating auto-creating a profile for the guest invitation in mock mode
-        userId = 'user_' + Math.random().toString(36).substr(2, 9);
-        targetProfile = {
-          id: userId,
-          email,
-          full_name: email.split('@')[0],
-          avatar_url: `https://api.dicebear.com/7.x/initials/svg?seed=${email.split('@')[0]}`
-        };
-        const dbState = JSON.parse(localStorage.getItem('taskflow_mock_db') || '{}');
-        dbState.profiles = dbState.profiles || [];
-        dbState.profiles.push(targetProfile);
-        localStorage.setItem('taskflow_mock_db', JSON.stringify(dbState));
-      }
-
-      // Check if already member
-      const existing = members.find(m => m.user_id === userId);
-      if (existing) {
-        throw new Error('User is already a member of this workspace');
-      }
-
-      const { data, error } = await supabase
-        .from('workspace_members')
-        .insert({
-          workspace_id: activeWorkspace.id,
-          user_id: userId,
-          role,
-          status: 'pending' // starts as pending invitation
-        })
+      const { data: inviteData, error: insertError } = await supabase
+        .from('workspace_invitations')
+        .insert(insertData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (insertError) {
+        if (insertError.code === '23505') {
+          throw new Error('This email address has already been invited to this workspace.');
+        }
+        throw insertError;
+      }
 
-      await triggerNotification(userId, `Workspace Invitation: ${activeWorkspace.name}`, `${user.full_name} invited you to join their workspace.`);
-      await logActivity('invited', 'member', email);
+      const tokenToUse = inviteData.token || generatedToken;
+      // Send invitation email directly via Resend API
+      const { error: emailError } = await sendInvitationEmail(
+        normalizedEmail,
+        activeWorkspace.name,
+        user.full_name,
+        role,
+        tokenToUse
+      );
+      if (emailError) {
+        console.error('Error sending invitation email:', emailError);
+      }
+
+      // If user is registered, trigger in-app notification
+      if (profile) {
+        await triggerNotification(
+          profile.id,
+          `Workspace Invitation: ${activeWorkspace.name}`,
+          `${user.full_name} invited you to join their workspace as a ${role}.`
+        );
+        await logActivity('invited', 'member', normalizedEmail);
+      } else {
+        await logActivity('invited guest', 'member', normalizedEmail);
+      }
+
       await refreshWorkspaceData();
-
-      return { member: { ...data, profile: targetProfile }, error: null };
+      return { member: inviteData, error: null };
     } catch (error: any) {
       console.error('Error inviting member:', error);
       return { member: null, error };
     }
   };
+
+  const cancelInvitation = async (invitationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('workspace_invitations')
+        .update({ status: 'Cancelled' })
+        .eq('id', invitationId);
+
+      if (error) throw error;
+      await refreshWorkspaceData();
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error cancelling invitation:', error);
+      return { error };
+    }
+  };
+
+  const resendInvitation = async (invitationId: string) => {
+    try {
+      if (!activeWorkspace || !user) throw new Error('No active workspace');
+      
+      let invitation = null;
+      if (isUsingMock) {
+        const dbState = JSON.parse(localStorage.getItem('taskflow_mock_db') || '{}');
+        invitation = (dbState.workspace_invitations || []).find((i: any) => i.id === invitationId);
+      } else {
+        const { data } = await supabase
+          .from('workspace_invitations')
+          .select('*')
+          .eq('id', invitationId)
+          .single();
+        invitation = data;
+      }
+      
+      if (!invitation) throw new Error('Invitation not found');
+
+      const newToken = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      const { data: updatedInvite, error: updateError } = await supabase
+        .from('workspace_invitations')
+        .update({
+          status: 'Pending',
+          expires_at: expiresAt,
+          token: newToken
+        })
+        .eq('id', invitationId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      const tokenToUse = updatedInvite.token || newToken;
+      // Resend invitation email directly via Resend API
+      const { error: emailError } = await sendInvitationEmail(
+        invitation.email,
+        activeWorkspace.name,
+        user.full_name,
+        invitation.role,
+        tokenToUse
+      );
+      if (emailError) {
+        console.error('Error resending invitation email:', emailError);
+      }
+
+      await refreshWorkspaceData();
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error resending invitation:', error);
+      return { error };
+    }
+  };
+
+  const getInviteByToken = async (token: string) => {
+    try {
+      if (isUsingMock) {
+        const dbState = JSON.parse(localStorage.getItem('taskflow_mock_db') || '{}');
+        const invitation = (dbState.workspace_invitations || []).find((i: any) => i.token === token);
+        if (!invitation) return { invitation: null, error: new Error('Invitation not found') };
+        
+        const workspace = (dbState.workspaces || []).find((w: any) => w.id === invitation.workspace_id);
+        const inviter = (dbState.profiles || []).find((p: any) => p.id === invitation.invited_by);
+        
+        return {
+          invitation: {
+            id: invitation.id,
+            workspace_id: invitation.workspace_id,
+            workspace_name: workspace ? workspace.name : 'Unknown Workspace',
+            inviter_name: inviter ? inviter.full_name : 'Workspace Owner',
+            email: invitation.email,
+            role: invitation.role,
+            status: invitation.status,
+            expires_at: invitation.expires_at
+          },
+          error: null
+        };
+      }
+
+      const { data, error } = await supabase.rpc('get_invitation_by_token', { invite_token: token });
+      if (error) throw error;
+      return { invitation: data?.[0] || null, error: null };
+    } catch (error: any) {
+      console.error('Error getting invitation by token:', error);
+      return { invitation: null, error };
+    }
+  };
+
+  const acceptInviteByToken = async (token: string) => {
+    try {
+      if (isUsingMock) {
+        if (!user) throw new Error('Not authenticated');
+        const dbState = JSON.parse(localStorage.getItem('taskflow_mock_db') || '{}');
+        const inviteIndex = (dbState.workspace_invitations || []).findIndex((i: any) => i.token === token);
+        if (inviteIndex === -1) throw new Error('Invitation not found');
+        
+        const invite = dbState.workspace_invitations[inviteIndex];
+        if (invite.status !== 'Pending') throw new Error(`Invitation has already been ${invite.status.toLowerCase()}`);
+        if (new Date(invite.expires_at) < new Date()) {
+          dbState.workspace_invitations[inviteIndex].status = 'Expired';
+          localStorage.setItem('taskflow_mock_db', JSON.stringify(dbState));
+          throw new Error('Invitation has expired');
+        }
+        
+        if (invite.email.toLowerCase() !== user.email.toLowerCase()) {
+          throw new Error(`This invitation was sent to ${invite.email}, but you are logged in as ${user.email}`);
+        }
+        
+        dbState.workspace_members = dbState.workspace_members || [];
+        const existingMember = dbState.workspace_members.find((m: any) => m.workspace_id === invite.workspace_id && m.user_id === user.id);
+        if (existingMember) {
+          const mIdx = dbState.workspace_members.findIndex((m: any) => m.id === existingMember.id);
+          dbState.workspace_members[mIdx].status = 'active';
+          dbState.workspace_members[mIdx].role = invite.role;
+        } else {
+          dbState.workspace_members.push({
+            id: 'wm_' + Math.random().toString(36).substr(2, 9),
+            workspace_id: invite.workspace_id,
+            user_id: user.id,
+            role: invite.role,
+            status: 'active',
+            created_at: new Date().toISOString()
+          });
+        }
+        
+        dbState.workspace_invitations[inviteIndex].status = 'Accepted';
+        dbState.workspace_invitations[inviteIndex].accepted_at = new Date().toISOString();
+        
+        dbState.activity_logs = dbState.activity_logs || [];
+        dbState.activity_logs.push({
+          id: 'act_' + Math.random().toString(36).substr(2, 9),
+          workspace_id: invite.workspace_id,
+          user_id: user.id,
+          action: 'joined',
+          target_type: 'user',
+          target_name: user.full_name,
+          created_at: new Date().toISOString()
+        });
+        
+        localStorage.setItem('taskflow_mock_db', JSON.stringify(dbState));
+        await refreshWorkspaceData();
+        await switchWorkspace(invite.workspace_id);
+        return { workspace_id: invite.workspace_id, error: null };
+      }
+
+      const { data, error } = await supabase.rpc('accept_workspace_invitation', { invite_token: token });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      await refreshWorkspaceData();
+      if (data?.workspace_id) {
+        await switchWorkspace(data.workspace_id);
+      }
+      return { workspace_id: data?.workspace_id, error: null };
+    } catch (error: any) {
+      console.error('Error accepting invitation:', error);
+      return { error };
+    }
+  };
+
+  const declineInviteByToken = async (token: string) => {
+    try {
+      if (isUsingMock) {
+        if (!user) throw new Error('Not authenticated');
+        const dbState = JSON.parse(localStorage.getItem('taskflow_mock_db') || '{}');
+        const inviteIndex = (dbState.workspace_invitations || []).findIndex((i: any) => i.token === token);
+        if (inviteIndex === -1) throw new Error('Invitation not found');
+        
+        const invite = dbState.workspace_invitations[inviteIndex];
+        if (invite.status !== 'Pending') throw new Error(`Invitation has already been ${invite.status.toLowerCase()}`);
+        if (invite.email.toLowerCase() !== user.email.toLowerCase()) {
+          throw new Error(`This invitation was sent to ${invite.email}, but you are logged in as ${user.email}`);
+        }
+        
+        dbState.workspace_invitations[inviteIndex].status = 'Declined';
+        localStorage.setItem('taskflow_mock_db', JSON.stringify(dbState));
+        return { error: null };
+      }
+
+      const { data, error } = await supabase.rpc('decline_workspace_invitation', { invite_token: token });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error declining invitation:', error);
+      return { error };
+    }
+  };
+
 
   const removeMember = async (memberId: string) => {
     try {
@@ -1424,6 +1811,85 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  const getWorkspaceMessages = async (workspaceId: string) => {
+    try {
+      const { data: messagesData, error } = await supabase
+        .from('workspace_messages')
+        .select(`
+          *,
+          profiles:user_id (*)
+        `)
+        .eq('workspace_id', workspaceId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      const messages = (messagesData || []).map((m: any) => {
+        let profile = m.profiles;
+        if (!profile) {
+          const dbState = JSON.parse(localStorage.getItem('taskflow_mock_db') || '{}');
+          profile = (dbState.profiles || []).find((p: any) => p.id === m.user_id);
+        }
+        return { ...m, profile };
+      });
+
+      return { messages, error: null };
+    } catch (error: any) {
+      console.error('Error loading workspace messages:', error);
+      return { messages: [], error };
+    }
+  };
+
+  const sendWorkspaceMessage = async (workspaceId: string, content: string) => {
+    try {
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('workspace_messages')
+        .insert({ workspace_id: workspaceId, user_id: user.id, content })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      let profile = null;
+      const { data: supabaseProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      if (supabaseProfile) {
+        profile = supabaseProfile;
+      } else {
+        const dbState = JSON.parse(localStorage.getItem('taskflow_mock_db') || '{}');
+        profile = (dbState.profiles || []).find((p: any) => p.id === user.id);
+      }
+
+      // Dispatch event in mock mode to update UI immediately on other pages/instances
+      if (isUsingMock) {
+        window.dispatchEvent(new CustomEvent('workspace-chat-message', { detail: { workspaceId } }));
+      }
+
+      // Mention notifications in chat
+      members.forEach((member) => {
+        const name = member.profile?.full_name;
+        if (name && content.toLowerCase().includes(`@${name.toLowerCase()}`) && member.user_id !== user.id) {
+          triggerNotification(
+            member.user_id,
+            `Mentioned in workspace chat: ${activeWorkspace?.name || 'Workspace'}`,
+            `${user.full_name}: "${content.substring(0, 40)}${content.length > 40 ? '...' : ''}"`
+          );
+        }
+      });
+
+      return { message: { ...data, profile }, error: null };
+    } catch (error: any) {
+      console.error('Error sending workspace message:', error);
+      return { message: null, error };
+    }
+  };
+
   // -------------------------------------------------------------
   // Helpers: Notifications & Activity Logging
   // -------------------------------------------------------------
@@ -1538,234 +2004,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  // seedDatabase is kept for API compatibility but no longer inserts any mock data.
   const seedDatabase = async () => {
-    try {
-      if (!user) throw new Error('Not authenticated');
-      setLoading(true);
-
-      // 1. Double check user profile exists in profiles
-      const { data: profileCheck } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      if (!profileCheck) {
-        await supabase.from('profiles').insert({
-          id: user.id,
-          email: user.email,
-          full_name: user.full_name || user.email.split('@')[0],
-          avatar_url: user.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`
-        });
-      }
-
-      // 2. Insert Workspace
-      const { data: wsData, error: wsErr } = await supabase
-        .from('workspaces')
-        .insert({
-          name: 'Acme Agency Co.',
-          description: 'Workspace for all creative design projects, client work, and marketing campaigns.',
-          logo_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop&q=60',
-          owner_id: user.id
-        })
-        .select()
-        .single();
-      
-      if (wsErr) throw wsErr;
-      const workspaceId = wsData.id;
-
-      // 3. Add Workspace Member (Owner)
-      const { error: memberErr } = await supabase
-        .from('workspace_members')
-        .insert({
-          workspace_id: workspaceId,
-          user_id: user.id,
-          role: 'owner',
-          status: 'active'
-        });
-      
-      if (memberErr) throw memberErr;
-
-      // 4. Insert Projects
-      const projectsToInsert = [
-        {
-          workspace_id: workspaceId,
-          name: 'TaskFlow Website Redesign',
-          description: 'Revamping the core promotional site and client onboarding portals to drive SaaS signups.',
-          start_date: '2026-06-01',
-          due_date: '2026-07-15',
-          priority: 'high',
-          status: 'active'
-        },
-        {
-          workspace_id: workspaceId,
-          name: 'Mobile App Beta Launch',
-          description: 'Publishing iOS and Android builds to TestFlight and Google Beta, getting feedback from first 100 beta testers.',
-          start_date: '2026-06-10',
-          due_date: '2026-08-30',
-          priority: 'critical',
-          status: 'active'
-        },
-        {
-          workspace_id: workspaceId,
-          name: 'Annual Security Review',
-          description: 'Conducting standard penetration tests, upgrading RLS roles, and renewing SOC 2 compliance reports.',
-          start_date: '2026-05-15',
-          due_date: '2026-06-05',
-          priority: 'medium',
-          status: 'completed'
-        }
-      ];
-
-      const insertedProjects: any[] = [];
-      for (const p of projectsToInsert) {
-        const { data: pData, error: pErr } = await supabase
-          .from('projects')
-          .insert(p)
-          .select()
-          .single();
-        if (pErr) throw pErr;
-        insertedProjects.push(pData);
-
-        // Add user as project member
-        await supabase.from('project_members').insert({
-          project_id: pData.id,
-          user_id: user.id
-        });
-      }
-
-      // Find the first project to attach tasks
-      const p1 = insertedProjects[0]; // TaskFlow Website Redesign
-      const p2 = insertedProjects[1]; // Mobile App Beta Launch
-
-      if (p1) {
-        // 5. Insert Tasks for p1
-        const tasksToInsert = [
-          {
-            project_id: p1.id,
-            title: 'Design high-fidelity homepage mockups',
-            description: 'Design dark mode home layouts focusing on pricing card details and the interactive product carousel widgets.',
-            assignee_id: user.id,
-            priority: 'high',
-            status: 'in_progress',
-            due_date: new Date(Date.now() + 3600000 * 240).toISOString(),
-            labels: ['Design', 'UI/UX']
-          },
-          {
-            project_id: p1.id,
-            title: 'Setup routing framework in React App',
-            description: 'Define routes using React Router DOM, create sidebar bindings, and protect dashboards with auth checks.',
-            assignee_id: user.id,
-            priority: 'critical',
-            status: 'todo',
-            due_date: new Date(Date.now() + 3600000 * 120).toISOString(),
-            labels: ['Frontend', 'Vite']
-          },
-          {
-            project_id: p1.id,
-            title: 'Configure local storage hybrid database clients',
-            description: 'Provide query fallback interceptors for developer testing when offline or missing Supabase keys.',
-            assignee_id: user.id,
-            priority: 'medium',
-            status: 'review',
-            due_date: new Date().toISOString(),
-            labels: ['Database', 'Config']
-          },
-          {
-            project_id: p1.id,
-            title: 'Review landing copy writing',
-            description: 'Confirm tagline headings, objectives, user value propositions, and success metrics wording.',
-            assignee_id: user.id,
-            priority: 'low',
-            status: 'completed',
-            due_date: new Date(Date.now() - 3600000 * 120).toISOString(),
-            labels: ['Copy']
-          }
-        ];
-
-        const insertedTasks: any[] = [];
-        for (const t of tasksToInsert) {
-          const { data: tData, error: tErr } = await supabase
-            .from('tasks')
-            .insert(t)
-            .select()
-            .single();
-          if (tErr) throw tErr;
-          insertedTasks.push(tData);
-        }
-
-        // Attach checklist items to t1 (homepage mockups) and t3 (local storage client)
-        const t1 = insertedTasks[0];
-        const t3 = insertedTasks[2];
-
-        if (t1) {
-          await supabase.from('checklists').insert([
-            { task_id: t1.id, title: 'Complete dashboard sidebar mockup', is_completed: true },
-            { task_id: t1.id, title: 'Verify responsive sizes (mobile & tablet)', is_completed: false },
-            { task_id: t1.id, title: 'Design user profile settings page popup', is_completed: false }
-          ]);
-
-          // Add comments
-          await supabase.from('comments').insert([
-            { task_id: t1.id, user_id: user.id, content: "The typography look looks excellent, David. Should we introduce Outfit font for a more SaaS feeling?" },
-            { task_id: t1.id, user_id: user.id, content: "Let's stick to Inter for content paragraphs, but Outfit or Roboto for larger H1/H2 elements sounds fantastic!" }
-          ]);
-
-          // Add attachments
-          await supabase.from('attachments').insert({
-            task_id: t1.id,
-            name: 'homepage_final.jpg',
-            url: 'https://images.unsplash.com/photo-1541462608141-2f5297e10a27?w=300&auto=format&fit=crop&q=80',
-            file_type: 'image/jpeg',
-            size: 124500
-          });
-        }
-
-        if (t3) {
-          await supabase.from('checklists').insert([
-            { task_id: t3.id, title: 'Test LocalStorage loading speed', is_completed: true },
-            { task_id: t3.id, title: 'Write unit mock tests', is_completed: true }
-          ]);
-
-          await supabase.from('attachments').insert({
-            task_id: t3.id,
-            name: 'database_mock_specs.pdf',
-            url: '#',
-            file_type: 'application/pdf',
-            size: 345000
-          });
-        }
-      }
-
-      if (p2) {
-        // Insert tasks for p2
-        await supabase.from('tasks').insert({
-          project_id: p2.id,
-          title: 'Prepare App Store deployment configs',
-          description: 'Compile developer certificates, write description summaries, upload screenshots of active workspaces.',
-          assignee_id: user.id,
-          priority: 'high',
-          status: 'backlog',
-          due_date: new Date(Date.now() + 3600000 * 480).toISOString(),
-          labels: ['DevOps', 'Mobile']
-        });
-      }
-
-      // 6. Insert Activity logs
-      await supabase.from('activity_logs').insert([
-        { workspace_id: workspaceId, user_id: user.id, action: 'created', target_type: 'project', target_name: 'TaskFlow Website Redesign' },
-        { workspace_id: workspaceId, user_id: user.id, action: 'created task', target_type: 'task', target_name: 'Design high-fidelity homepage mockups' }
-      ]);
-
-      // 7. Reload all data
-      await loadWorkspacesData();
-      return { success: true, error: null };
-    } catch (error: any) {
-      console.error('Failed to seed live database:', error);
-      return { success: false, error };
-    } finally {
-      setLoading(false);
-    }
+    return { success: true, error: null };
   };
 
   return (
@@ -1774,6 +2015,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       activeWorkspace,
       projects,
       members,
+      invitations,
       teams,
       teamMembers,
       notifications,
@@ -1790,6 +2032,11 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       changeMemberRole,
       acceptInvitation,
       declineInvitation,
+      resendInvitation,
+      cancelInvitation,
+      acceptInviteByToken,
+      declineInviteByToken,
+      getInviteByToken,
       createTeam,
       updateTeam,
       deleteTeam,
@@ -1813,6 +2060,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       logActivity,
       getProjectMessages,
       sendProjectMessage,
+      getWorkspaceMessages,
+      sendWorkspaceMessage,
+      deleteWorkspace,
       triggerNotification,
       refreshWorkspaceData,
       seedDatabase
