@@ -22,6 +22,7 @@ import Files from './pages/Files';
 import ActivityLogs from './pages/ActivityLogs';
 import InviteLanding from './pages/InviteLanding';
 import TeamChat from './pages/TeamChat';
+import Homepage from './pages/Homepage';
 
 // Layout
 import Sidebar from './components/shared/Sidebar';
@@ -107,6 +108,9 @@ const App: React.FC = () => {
           <FirewallProvider>
             <WorkspaceProvider>
               <Routes>
+                {/* Public Homepage */}
+                <Route path="/home" element={<Homepage />} />
+
                 {/* Auth Portals */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
